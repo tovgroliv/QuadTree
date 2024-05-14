@@ -1,6 +1,6 @@
 ﻿namespace QuadTree.Lib;
 
-public struct Point : IQuadTreeObject
+public struct Point
 {
 	public double X { get; set; }
 	public double Y { get; set; }

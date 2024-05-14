@@ -2,4 +2,5 @@
 
 public interface IQuadTreeObject
 {
+	Point Point { get; }
 }

@@ -17,7 +17,7 @@ public class Quadtree<T> where T : IQuadTreeObject
 
 	public void Insert(T obj)
 	{
-		if (!_bounds.Contains(obj))
+		if (!_bounds.Contains(obj.Point))
 		{
 			throw new ArgumentException("Object is not within the bounds of the quadtree");
 		}
@@ -40,7 +40,7 @@ public class Quadtree<T> where T : IQuadTreeObject
 
 	public void Remove(T obj)
 	{
-		if (!_bounds.Contains(obj))
+		if (!_bounds.Contains(obj.Point))
 		{
 			throw new ArgumentException("Object is not within the bounds of the quadtree");
 		}
@@ -63,7 +63,7 @@ public class Quadtree<T> where T : IQuadTreeObject
 
 	public void Update(T obj)
 	{
-		if (!_bounds.Contains(obj))
+		if (!_bounds.Contains(obj.Point))
 		{
 			throw new ArgumentException("Object is not within the bounds of the quadtree");
 		}
@@ -105,7 +105,7 @@ public class Quadtree<T> where T : IQuadTreeObject
 		{
 			foreach (T obj in _objects)
 			{
-				if (bounds.Contains(obj))
+				if (bounds.Contains(obj.Point))
 				{
 					foundObjects.Add(obj);
 				}
