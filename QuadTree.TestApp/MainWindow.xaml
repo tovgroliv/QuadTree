@@ -1,0 +1,74 @@
+﻿<Window x:Class="QuadTree.TestApp.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:local="clr-namespace:QuadTree.TestApp"
+		mc:Ignorable="d"
+		Title="MainWindow" Height="600" Width="800">
+	<Grid Margin="10" x:Name="gMain">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto" />
+			<ColumnDefinition />
+		</Grid.ColumnDefinitions>
+
+		<Canvas
+			x:Name="cMainCanvas"
+			Grid.Column="0"
+			Width="560" Height="560"
+			Background="LightGray"
+			MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
+			MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
+			MouseMove="Canvas_MouseMove" />
+
+		<Canvas
+			Background="Transparent"
+			IsHitTestVisible="false"
+			HorizontalAlignment="Center"
+			Height="560" Width="560" ClipToBounds="True" >
+			<Rectangle Canvas.Top="{Binding SelectionRectangleTop}" Canvas.Left="{Binding SelectionRectangleLeft}" Stroke="Black" Height="{Binding SelectionRectangleHeight}" Width="{Binding SelectionRectangleWidth}" Visibility="{Binding SelectionRectangleVisibility}" StrokeThickness="1" />
+		</Canvas>
+
+		<StackPanel Grid.Column="1" Margin="10,0,0,0">
+			<TextBlock Text="Настройки" />
+			<GroupBox Header="Добавить рандомно">
+				<StackPanel>
+					<TextBox x:Name="countRandomField" />
+					<Button Content="Выполнить" Click="AddRandomButton_Click" />
+				</StackPanel>
+			</GroupBox>
+			<GroupBox Header="Ближайшие точки">
+				<StackPanel>
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+						<TextBlock Grid.Column="0" Text="Количество" />
+						<TextBox Grid.Column="1" x:Name="countSearchField" />
+					</Grid>
+					<CheckBox x:Name="cbNeighbourSearch" Content="Поиск ближайших точек" />
+				</StackPanel>
+			</GroupBox>
+			<GroupBox Header="Поле">
+				<StackPanel>
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+						<TextBlock Grid.Column="0" Text="Всего элементов - " />
+						<TextBlock x:Name="coundLabel" Grid.Column="1" Text="0" />
+					</Grid>
+					<Button Content="Очистить выделение" Click="DeselectButton_Click" />
+					<Button Content="Очистить поле" Click="ClearButton_Click" />
+				</StackPanel>
+			</GroupBox>
+			<GroupBox Header="Закрыть приложение">
+				<StackPanel>
+					<Button Content="Выполнить" Click="ExitButton_Click" />
+				</StackPanel>
+			</GroupBox>
+		</StackPanel>
+	</Grid>
+</Window>
