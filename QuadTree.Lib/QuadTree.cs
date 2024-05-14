@@ -48,20 +48,66 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeData
 
 		//}
 	}
+	public void Remove(T in_data)
+	{
+		var node = new QuadTreeLeaf<T>(in_data);
 
-	//public void Remove(T obj)
-	//{
-	//	if (this.Count() != 0)
-	//	{
-	//		int index = (int)GetChildIndex(obj);
-	//		_children[index].Remove(obj);
+		Find(m_root, node);
+	}
 
-	//		if (_children[index]._objects.Count == 0)
-	//		{
-	//			_children.RemoveAt(index);
-	//		}
-	//	}
-	//}
+	private QuadTreeNode<T>? Find(IQuadTreeData node_to_remove)
+	{
+		QuadTreeNode<T> current = m_root;
+
+		while (current != null)
+		{
+			if (current.Children != null)
+			{
+				QuadTreeNode<T>[] children = current.Children;
+
+				if (children[2].Bounds != null && children[2].Bounds.IsPointInside(node_to_remove))
+				{
+					current = children[2];
+					continue;
+				}
+
+				if (children[1].Bounds != null && children[1].Bounds.IsPointInside(node_to_remove))
+				{
+					current = children[1];
+					continue;
+				}
+
+				if (children[3].Bounds != null && children[3].Bounds.IsPointInside(node_to_remove))
+				{
+					current = children[3];
+					continue;
+				}
+
+				if (children[0].Bounds != null && children[0].Bounds.IsPointInside(node_to_remove))
+				{
+					current = children[0];
+					continue;
+				}
+			}
+			else
+			{
+				QuadTreeLeaf<T> node = current.Data;
+
+				while (node != null)
+				{
+					if (node.Data.X == node_to_remove.X && node.Data.Y == node_to_remove.Y)
+						yield return node.Data;
+
+					node = node.Next;
+				}
+
+				if (node != null)
+				{
+					
+				}
+			}
+		}
+	}
 
 	public void Insert(T in_data)
 	{
