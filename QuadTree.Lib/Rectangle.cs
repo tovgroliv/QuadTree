@@ -1,13 +1,13 @@
 ﻿namespace QuadTree.Lib;
 
-public class Rectangle
+public class Rectangle : IQuadTreeObject
 {
-	public double X { get; set; }
-	public double Y { get; set; }
-	public double Width { get; set; }
-	public double Height { get; set; }
+	public float X { get; set; }
+	public float Y { get; set; }
+	public int Width { get; set; }
+	public int Height { get; set; }
 
-	public Rectangle(double x, double y, double width, double height)
+	public Rectangle(float x, float y, int width, int height)
 	{
 		X = x;
 		Y = y;
@@ -15,12 +15,26 @@ public class Rectangle
 		Height = height;
 	}
 
-	public bool Contains(Rectangle rect)
+	public bool Contains(IQuadTreeObject rect)
+	{
+		if (rect is Rectangle)
+		{
+			return Contains((Rectangle)rect);
+		}
+		if (rect is Point)
+		{
+			return Contains((Point)rect);
+		}
+
+		throw new Exception();
+	}
+
+	private bool Contains(Rectangle rect)
 	{
 		return X <= rect.X && X + Width >= rect.X + rect.Width && Y <= rect.Y && Y + Height >= rect.Y + rect.Height;
 	}
 
-	public bool Contains(Point point)
+	private bool Contains(Point point)
 	{
 		return X <= point.X && X + Width >= point.X && Y <= point.Y && Y + Height >= point.Y;
 	}

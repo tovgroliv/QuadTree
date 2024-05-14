@@ -1,6 +1,6 @@
 ﻿namespace QuadTree.Lib;
 
-public class Quadtree<T>
+public class Quadtree<T> where T : IQuadTreeObject
 {
 	private Rectangle _bounds;
 	private int _maxObjects;
@@ -33,7 +33,7 @@ public class Quadtree<T>
 		}
 		else
 		{
-			int index = GetChildIndex(obj);
+			int index = (int)GetChildIndex(obj);
 			_children[index].Insert(obj);
 		}
 	}
@@ -51,7 +51,7 @@ public class Quadtree<T>
 		}
 		else
 		{
-			int index = GetChildIndex(obj);
+			int index = (int)GetChildIndex(obj);
 			_children[index].Remove(obj);
 
 			if (_children[index]._objects.Count == 0)
@@ -82,7 +82,7 @@ public class Quadtree<T>
 		}
 		else
 		{
-			int index = GetChildIndex(obj);
+			int index = (int)GetChildIndex(obj);
 
 			if (_children[index]._objects.Contains(obj))
 			{
@@ -134,16 +134,16 @@ public class Quadtree<T>
 
 		foreach (T obj in _objects)
 		{
-			int index = GetChildIndex(obj);
+			int index = (int)GetChildIndex(obj);
 			_children[index].Insert(obj);
 		}
 
 		_objects.Clear();
 	}
 
-	private int GetChildIndex(T obj)
+	private QuadTreeIndexEnum GetChildIndex(T obj)
 	{
-		int index = -1;
+		QuadTreeIndexEnum index = QuadTreeIndexEnum.None;
 
 		double verticalMidpoint = _bounds.X + (_bounds.Width / 2);
 		double horizontalMidpoint = _bounds.Y + (_bounds.Height / 2);
@@ -155,22 +155,22 @@ public class Quadtree<T>
 		{
 			if (top)
 			{
-				index = 0;
+				index = QuadTreeIndexEnum.NE;
 			}
 			else
 			{
-				index = 2;
+				index = QuadTreeIndexEnum.SE;
 			}
 		}
 		else
 		{
 			if (top)
 			{
-				index = 1;
+				index = QuadTreeIndexEnum.NW;
 			}
 			else
 			{
-				index = 3;
+				index = QuadTreeIndexEnum.SW;
 			}
 		}
 
