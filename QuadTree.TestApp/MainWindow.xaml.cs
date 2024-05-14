@@ -26,11 +26,19 @@ namespace QuadTree.TestApp
 		public class TreeData : IQuadTreeData
 		{
 			public Ellipse Marker;
+
+			public float SpeedX { get; set; } = 10;
+			public float SpeedY { get; set; } = 10;
+
 			public float X { get; set; }
 			public float Y { get; set; }
 
 			public TreeData(float in_x, float in_y)
 			{
+				var random = new Random();
+				SpeedX *= Math.Sign(random.Next(-1, 1) == 0 ? 1 : -1);
+				SpeedY *= Math.Sign(random.Next(-1, 1) == 0 ? 1 : -1);
+
 				Marker = new Ellipse()
 				{
 					Width = 5,
@@ -45,6 +53,12 @@ namespace QuadTree.TestApp
 
 				X = in_x;
 				Y = in_y;
+			}
+
+			public void Update()
+			{
+				Marker.SetValue(Canvas.LeftProperty, X - 2.5);
+				Marker.SetValue(Canvas.TopProperty, Y - 2.5);
 			}
 		}
 
@@ -66,12 +80,55 @@ namespace QuadTree.TestApp
 
 		public Random m_rnd = new Random(DateTime.Now.Millisecond);
 
+		bool work = true;
+
 		public MainWindow()
 		{
 			InitializeComponent();
 			gMain.DataContext = this;
 
 			m_quadtree = new QuadTree<TreeData>((float)cMainCanvas.Width / 2, (float)cMainCanvas.Width / 2, (float)cMainCanvas.Width / 2, 4);
+
+			this.Closing += (s,e) => work = false;
+
+			Thread moveThread = new Thread(() => Moving());
+			moveThread.IsBackground = true;
+			moveThread.Start();
+		}
+
+		private void Moving()
+		{
+			while (work)
+			{
+				Thread.Sleep(100);
+
+				lock (m_quadtree)
+				{
+                    foreach (var item in m_quadtree)
+                    {
+						item.X = Math.Clamp(item.X + item.SpeedX, 0, 560);
+						item.Y = Math.Clamp(item.Y + item.SpeedY, 0, 560);
+
+						if (item.X == 0 || item.X == 560)
+						{
+							item.SpeedX *= -1;
+						}
+						if (item.Y == 0 || item.Y == 560)
+						{
+							item.SpeedY *= -1;
+						}
+
+						if (work)
+						{
+							Application.Current.Dispatcher.Invoke(new Action(() => item.Update()));
+						}
+						else
+						{
+							return;
+						}
+					}
+                }
+			}
 		}
 
 		private void DrawQuadtree()

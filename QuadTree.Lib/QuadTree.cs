@@ -35,6 +35,33 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeData
 		m_root.Children = null;
 		m_root.Data = null;
 	}
+	public void Update(T obj)
+	{
+		//if (this.Count() == 0)
+		//{
+		//	Insert(obj);
+		//}
+		//else
+		//{
+		//	Remove(obj);
+		//	Insert(obj);
+
+		//}
+	}
+
+	//public void Remove(T obj)
+	//{
+	//	if (this.Count() != 0)
+	//	{
+	//		int index = (int)GetChildIndex(obj);
+	//		_children[index].Remove(obj);
+
+	//		if (_children[index]._objects.Count == 0)
+	//		{
+	//			_children.RemoveAt(index);
+	//		}
+	//	}
+	//}
 
 	public void Insert(T in_data)
 	{
