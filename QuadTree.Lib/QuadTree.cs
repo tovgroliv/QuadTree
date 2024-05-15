@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Linq;
 using QuadTree.Lib.Entities;
 using QuadTree.Lib.Interfaces;
 
@@ -48,66 +49,66 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeData
 
 		//}
 	}
-	public void Remove(T in_data)
-	{
-		var node = new QuadTreeLeaf<T>(in_data);
+	//public void Remove(T in_data)
+	//{
+	//	var node = new QuadTreeLeaf<T>(in_data);
 
-		Find(m_root, node);
-	}
+	//	Find(m_root, node);
+	//}
 
-	private QuadTreeNode<T>? Find(IQuadTreeData node_to_remove)
-	{
-		QuadTreeNode<T> current = m_root;
+	//private QuadTreeNode<T>? Find(IQuadTreeData node_to_remove)
+	//{
+	//	QuadTreeNode<T> current = m_root;
 
-		while (current != null)
-		{
-			if (current.Children != null)
-			{
-				QuadTreeNode<T>[] children = current.Children;
+	//	while (current != null)
+	//	{
+	//		if (current.Children != null)
+	//		{
+	//			QuadTreeNode<T>[] children = current.Children;
 
-				if (children[2].Bounds != null && children[2].Bounds.IsPointInside(node_to_remove))
-				{
-					current = children[2];
-					continue;
-				}
+	//			if (children[2].Bounds != null && children[2].Bounds.IsPointInside(node_to_remove))
+	//			{
+	//				current = children[2];
+	//				continue;
+	//			}
 
-				if (children[1].Bounds != null && children[1].Bounds.IsPointInside(node_to_remove))
-				{
-					current = children[1];
-					continue;
-				}
+	//			if (children[1].Bounds != null && children[1].Bounds.IsPointInside(node_to_remove))
+	//			{
+	//				current = children[1];
+	//				continue;
+	//			}
 
-				if (children[3].Bounds != null && children[3].Bounds.IsPointInside(node_to_remove))
-				{
-					current = children[3];
-					continue;
-				}
+	//			if (children[3].Bounds != null && children[3].Bounds.IsPointInside(node_to_remove))
+	//			{
+	//				current = children[3];
+	//				continue;
+	//			}
 
-				if (children[0].Bounds != null && children[0].Bounds.IsPointInside(node_to_remove))
-				{
-					current = children[0];
-					continue;
-				}
-			}
-			else
-			{
-				QuadTreeLeaf<T> node = current.Data;
+	//			if (children[0].Bounds != null && children[0].Bounds.IsPointInside(node_to_remove))
+	//			{
+	//				current = children[0];
+	//				continue;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			QuadTreeLeaf<T> node = current.Data;
 
-				while (node != null)
-				{
-					if (node.Data.X == node_to_remove.X && node.Data.Y == node_to_remove.Y)
-						yield return node.Data;
+	//			while (node != null)
+	//			{
+	//				if (node.Data.X == node_to_remove.X && node.Data.Y == node_to_remove.Y)
+	//					yield return node.Data;
 
-					node = node.Next;
-				}
+	//				node = node.Next;
+	//			}
 
-				if (node != null)
-				{
+	//			if (node != null)
+	//			{
 					
-				}
-			}
-		}
-	}
+	//			}
+	//		}
+	//	}
+	//}
 
 	public void Insert(T in_data)
 	{
@@ -122,53 +123,24 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeData
 		if (!in_current_node.Bounds.IsPointInside(in_node_to_insert.Data))
 			return;
 
-		QuadTreeLeaf<T> nodes_to_insert = null;
-		QuadTreeLeaf<T> node;
+		List<QuadTreeLeaf<T>> nodes_to_insert = null;
 		int quadrant;
 
 		// if this node is leaf
 		if (in_current_node.Children == null)
 		{
-			// this is the first data item in the leaf
-			if (in_current_node.Data == null)
+			in_current_node.Data.Add(in_node_to_insert);
+			if (in_current_node.Data.Count() < m_bucket_capacity)
 			{
-				in_current_node.Data = in_node_to_insert;
-
 				return;
 			}
 			else
 			{
-				int item_count = 0;
-
-				// add to the end of list of data
-				node = in_current_node.Data;
-				while (true)
-				{
-					if (Math.Abs(in_node_to_insert.Data.X - node.Data.X) <= float.Epsilon && Math.Abs(in_node_to_insert.Data.Y - node.Data.Y) <= float.Epsilon)
-						throw new ArgumentException("Key already exists");
-
-					item_count++;
-
-					if (node.Next != null)
-						node = node.Next;
-					else
-						break;
-				}
-
-				// there is room for this item
-				if (item_count < m_bucket_capacity)
-				{
-					// add node to the list of data
-					node.Next = in_node_to_insert;
-
-					return;
-				}
-
 				// current node needs to be splitted
 				nodes_to_insert = in_current_node.Data;
 
 				// remove data
-				in_current_node.Data = null;
+				in_current_node.Data = new();
 			}
 		}
 		else
@@ -197,18 +169,11 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeData
 		Insert(subdivision[quadrant], in_node_to_insert);
 
 		// insert nodes from the splitted node
-		node = nodes_to_insert;
-		QuadTreeLeaf<T> next_node;
-		while (node != null)
+		foreach (var node in nodes_to_insert)
 		{
-			next_node = node.Next;
-			node.Next = null;
-
 			quadrant = bounds.GetQuadrantIndex(node.Data);
 
 			Insert(subdivision[quadrant], node);
-
-			node = next_node;
 		}
 
 		in_current_node.Children = subdivision;
@@ -240,15 +205,12 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeData
 			}
 			else
 			{
-				QuadTreeLeaf<T> node = current.Data;
+				var nodes = current.Data;
 
-				while (node != null)
+				nodes.ForEach(node =>
 				{
 					in_data_process_callback(node.Data);
-
-
-					node = node.Next;
-				}
+				});
 
 				if (stack.Count > 0)
 					current = stack.Pop();
@@ -283,14 +245,12 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeData
 			}
 			else
 			{
-				QuadTreeLeaf<T> node = current.Data;
+				var nodes = current.Data;
 
-				while (node != null)
+				foreach (var node in nodes)
 				{
 					if (node.Data.X > in_left && node.Data.X < in_left + in_width && node.Data.Y > in_top && node.Data.Y < in_top + in_height)
 						yield return node.Data;
-
-					node = node.Next;
 				}
 			}
 
@@ -317,13 +277,11 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeData
 			}
 			else
 			{
-				QuadTreeLeaf<T> node = current.Data;
+				var nodes = current.Data;
 
-				while (node != null)
+				foreach (var node in nodes)
 				{
 					yield return node.Data;
-
-					node = node.Next;
 				}
 			}
 
@@ -393,10 +351,7 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeData
 			}
 			else
 			{
-				// process data points
-				QuadTreeLeaf<T> current_leaf_entry = current.Data;
-
-				while (current_leaf_entry != null)
+				foreach (var current_leaf_entry in current.Data)
 				{
 					// calculate distance (squared)
 					double squared_distance = current_leaf_entry.GetSquaredDistance(in_x, in_y);
@@ -455,8 +410,6 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeData
 							}
 						}
 					}
-
-					current_leaf_entry = current_leaf_entry.Next;
 				}
 
 				// get new element from the stack or exit if no more element to investigate
