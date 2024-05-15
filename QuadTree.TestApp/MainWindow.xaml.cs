@@ -2,16 +2,10 @@
 using QuadTree.Lib.Entities;
 using QuadTree.Lib.Interfaces;
 using System.ComponentModel;
-using System.DirectoryServices.ActiveDirectory;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace QuadTree.TestApp
@@ -23,7 +17,7 @@ namespace QuadTree.TestApp
 	{
 		enum MouseMode { None, Point, Selection };
 
-		public class TreeData : IQuadTreeData
+		public class TreeData : IQuadTreeItem
 		{
 			public Ellipse Marker;
 
@@ -104,8 +98,10 @@ namespace QuadTree.TestApp
 
 				lock (m_quadtree)
 				{
-                    foreach (var item in m_quadtree)
-                    {
+					foreach (var item in m_quadtree)
+					{
+						var oldX = item.X;
+						var oldY = item.Y;
 						item.X = Math.Clamp(item.X + item.SpeedX, 0, 560);
 						item.Y = Math.Clamp(item.Y + item.SpeedY, 0, 560);
 
@@ -118,16 +114,23 @@ namespace QuadTree.TestApp
 							item.SpeedY *= -1;
 						}
 
+						m_quadtree.Update(item, oldX, oldY);
+
 						if (work)
 						{
-							Application.Current.Dispatcher.Invoke(new Action(() => item.Update()));
+							Application.Current.Dispatcher.Invoke(new Action(() =>
+							{
+								item.Update();
+								cMainCanvas.Children.Clear();
+								//DrawQuadtree();
+							}));
 						}
 						else
 						{
 							return;
 						}
 					}
-                }
+				}
 			}
 		}
 
@@ -136,7 +139,7 @@ namespace QuadTree.TestApp
 			m_quadtree.TraverseNodesAndLeafs(DrawQuadTreeLeaf, DrawQuadTreeNode);
 		}
 
-		private void DrawQuadTreeNode(QuadTreeRegion in_bounds)
+		private void DrawQuadTreeNode(QuadTreeRect in_bounds)
 		{
 			var rect = new Rectangle()
 			{
@@ -200,29 +203,29 @@ namespace QuadTree.TestApp
 					}
 					break;
 
-				case MouseMode.Selection:
-					{
-						SelectionRectangleVisibility = Visibility.Hidden;
-						NotifyPropertyChanged("SelectionRectangleVisibility");
+				//case MouseMode.Selection:
+				//	{
+				//		SelectionRectangleVisibility = Visibility.Hidden;
+				//		NotifyPropertyChanged("SelectionRectangleVisibility");
 
-						ClearRegionMarkers();
-						m_selection_active = false;
+				//		ClearRegionMarkers();
+				//		m_selection_active = false;
 
 
-						float left = (float)Math.Min(m_selection_rectangle_start.X, pos.X);
-						float top = (float)Math.Min(m_selection_rectangle_start.Y, pos.Y);
-						float width = (float)Math.Abs(m_selection_rectangle_start.X - pos.X);
-						float height = (float)Math.Abs(m_selection_rectangle_start.Y - pos.Y);
+				//		float left = (float)Math.Min(m_selection_rectangle_start.X, pos.X);
+				//		float top = (float)Math.Min(m_selection_rectangle_start.Y, pos.Y);
+				//		float width = (float)Math.Abs(m_selection_rectangle_start.X - pos.X);
+				//		float height = (float)Math.Abs(m_selection_rectangle_start.Y - pos.Y);
 
-						foreach (TreeData data in m_quadtree.Query(left, top, width, height))
-						{
-							m_selection_active = true;
-							data.Marker.Fill = Brushes.Red;
-						}
+				//		foreach (TreeData data in m_quadtree.Query(left, top, width, height))
+				//		{
+				//			m_selection_active = true;
+				//			data.Marker.Fill = Brushes.Red;
+				//		}
 
-						m_mouse_mode = MouseMode.None;
-					}
-					break;
+				//		m_mouse_mode = MouseMode.None;
+				//	}
+				//	break;
 			}
 
 		}
@@ -269,7 +272,7 @@ namespace QuadTree.TestApp
 							distance = 10;
 						}
 
-						m_neighbour_data = m_quadtree.QueryNeighbours((float)current_pos.X, (float)current_pos.Y, distance);
+						m_neighbour_data = m_quadtree.QueryNeighbours((float)current_pos.X, (float)current_pos.Y, distance, 10).ToList();
 
 						foreach (TreeData data in m_neighbour_data)
 						{

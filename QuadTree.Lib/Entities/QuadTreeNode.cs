@@ -2,16 +2,16 @@
 
 namespace QuadTree.Lib.Entities;
 
-internal class QuadTreeNode<T> where T : IQuadTreeData
+internal class QuadTreeNode<T> where T : IQuadTreeItem
 {
-	public QuadTreeRegion Bounds;
-	public QuadTreeNode<T>[] Children;
-	public List<QuadTreeLeaf<T>> Data;
+    public QuadTreeRect Bounds;
+    public QuadTreeNode<T>[]? Children;
+    public List<T> Elements;
 
-	public QuadTreeNode(QuadTreeRegion in_region)
-	{
-		Bounds = in_region;
-		Children = null;
-		Data = new();
-	}
+    public QuadTreeNode(QuadTreeRect region)
+    {
+        Bounds = region;
+        Children = null;
+        Elements = new();
+    }
 }

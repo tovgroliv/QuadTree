@@ -1,201 +1,221 @@
-﻿using System.Collections;
-using System.Linq;
-using QuadTree.Lib.Entities;
+﻿using QuadTree.Lib.Entities;
 using QuadTree.Lib.Interfaces;
+using System.Collections;
 
 namespace QuadTree.Lib;
 
-public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeData
+public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 {
-	private QuadTreeNode<T> m_root;
-	private int m_bucket_capacity;
-	private int m_node_count;
+	private QuadTreeNode<T> _root;
+	private int _nodeCapacity;
 
-	public QuadTree(QuadTreeRegion in_region, int in_bucket_capacity)
+	public QuadTree(QuadTreeRect region, int nodeCapacity)
 	{
-		m_root = new QuadTreeNode<T>(in_region);
-		m_bucket_capacity = in_bucket_capacity;
-		m_node_count = 0;
+		_root = new QuadTreeNode<T>(region);
+		_nodeCapacity = nodeCapacity;
 	}
 
-	public QuadTree(QuadTreeRegion in_region) : this(in_region, 1)
-	{
-
-	}
-
-	public QuadTree(float in_center_x, float in_center_y, float in_half_size) : this(new QuadTreeRegion(in_center_x, in_center_y, in_half_size))
-	{
-	}
-
-	public QuadTree(float in_center_x, float in_center_y, float in_half_size, int in_bucket_size) : this(new QuadTreeRegion(in_center_x, in_center_y, in_half_size), in_bucket_size)
-	{
-	}
+	public QuadTree(QuadTreeRect region) : this(region, 1) { }
+	public QuadTree(float centerX, float centerY, float halfSize) : this(new QuadTreeRect(centerX, centerY, halfSize)) { }
+	public QuadTree(float centerX, float centerY, float halfSize, int nodeCapacity) : this(new QuadTreeRect(centerX, centerY, halfSize), nodeCapacity) { }
 
 	public void Clear()
 	{
-		m_root.Children = null;
-		m_root.Data = null;
-	}
-	public void Update(T obj)
-	{
-		//if (this.Count() == 0)
-		//{
-		//	Insert(obj);
-		//}
-		//else
-		//{
-		//	Remove(obj);
-		//	Insert(obj);
-
-		//}
-	}
-	//public void Remove(T in_data)
-	//{
-	//	var node = new QuadTreeLeaf<T>(in_data);
-
-	//	Find(m_root, node);
-	//}
-
-	//private QuadTreeNode<T>? Find(IQuadTreeData node_to_remove)
-	//{
-	//	QuadTreeNode<T> current = m_root;
-
-	//	while (current != null)
-	//	{
-	//		if (current.Children != null)
-	//		{
-	//			QuadTreeNode<T>[] children = current.Children;
-
-	//			if (children[2].Bounds != null && children[2].Bounds.IsPointInside(node_to_remove))
-	//			{
-	//				current = children[2];
-	//				continue;
-	//			}
-
-	//			if (children[1].Bounds != null && children[1].Bounds.IsPointInside(node_to_remove))
-	//			{
-	//				current = children[1];
-	//				continue;
-	//			}
-
-	//			if (children[3].Bounds != null && children[3].Bounds.IsPointInside(node_to_remove))
-	//			{
-	//				current = children[3];
-	//				continue;
-	//			}
-
-	//			if (children[0].Bounds != null && children[0].Bounds.IsPointInside(node_to_remove))
-	//			{
-	//				current = children[0];
-	//				continue;
-	//			}
-	//		}
-	//		else
-	//		{
-	//			QuadTreeLeaf<T> node = current.Data;
-
-	//			while (node != null)
-	//			{
-	//				if (node.Data.X == node_to_remove.X && node.Data.Y == node_to_remove.Y)
-	//					yield return node.Data;
-
-	//				node = node.Next;
-	//			}
-
-	//			if (node != null)
-	//			{
-					
-	//			}
-	//		}
-	//	}
-	//}
-
-	public void Insert(T in_data)
-	{
-		var node = new QuadTreeLeaf<T>(in_data);
-
-		Insert(m_root, node);
+		_root.Children = null;
+		_root.Elements = new();
 	}
 
-	private void Insert(QuadTreeNode<T> in_current_node, QuadTreeLeaf<T> in_node_to_insert)
+	public bool Update(T data, float oldX, float oldY)
 	{
-		// check if point ot insert is inside -> if it is not then it can not be child of this node
-		if (!in_current_node.Bounds.IsPointInside(in_node_to_insert.Data))
-			return;
-
-		List<QuadTreeLeaf<T>> nodes_to_insert = null;
-		int quadrant;
-
-		// if this node is leaf
-		if (in_current_node.Children == null)
+		if (UpdateRemove(_root, data, oldX, oldY))
 		{
-			in_current_node.Data.Add(in_node_to_insert);
-			if (in_current_node.Data.Count() < m_bucket_capacity)
+			Insert(data);
+			return true;
+		}
+		return false;
+	}
+
+	private bool UpdateRemove(QuadTreeNode<T> currentNode, T dataToRemove, float oldX, float oldY)
+	{
+		if (!currentNode.Bounds.IsPointInside(dataToRemove))
+		{
+			return false;
+		}
+
+		if (currentNode.Children != null)
+		{
+			var children = currentNode.Children;
+			var result = false;
+
+			if (children[0].Bounds != null && children[0].Bounds.IsPointInside(dataToRemove))
+			{
+				result = UpdateRemove(children[0], dataToRemove, oldX, oldY);
+			}
+
+			if (children[1].Bounds != null && children[1].Bounds.IsPointInside(dataToRemove))
+			{
+				result = UpdateRemove(children[1], dataToRemove, oldX, oldY);
+			}
+
+			if (children[2].Bounds != null && children[2].Bounds.IsPointInside(dataToRemove))
+			{
+				result = UpdateRemove(children[2], dataToRemove, oldX, oldY);
+			}
+
+			if (children[3].Bounds != null && children[3].Bounds.IsPointInside(dataToRemove))
+			{
+				result = UpdateRemove(children[3], dataToRemove, oldX, oldY);
+			}
+
+			if (result == true)
+			{
+				if (children[0].Elements.Count() == 0 &&
+					children[1].Elements.Count() == 0 &&
+					children[2].Elements.Count() == 0 &&
+					children[3].Elements.Count() == 0)
+				{
+					currentNode.Children = null;
+				}
+
+				return true;
+			}
+		}
+		else
+		{
+			if (currentNode.Elements.Contains(dataToRemove) && !currentNode.Bounds.IsPointInside(oldX, oldY))
+			{
+				return currentNode.Elements.Remove(dataToRemove);
+			}
+		}
+
+		return false;
+	}
+
+	public bool Remove(T data)
+	{
+		return Remove(_root, data);
+	}
+
+	private bool Remove(QuadTreeNode<T> currentNode, T dataToRemove)
+	{
+		if (!currentNode.Bounds.IsPointInside(dataToRemove))
+		{
+			return false;
+		}
+
+		if (currentNode.Children != null)
+		{
+			var children = currentNode.Children;
+			var result = false;
+
+			if (children[0].Bounds != null && children[0].Bounds.IsPointInside(dataToRemove))
+			{
+				result = Remove(children[0], dataToRemove);
+			}
+
+			if (children[1].Bounds != null && children[1].Bounds.IsPointInside(dataToRemove))
+			{
+				result = Remove(children[1], dataToRemove);
+			}
+
+			if (children[2].Bounds != null && children[2].Bounds.IsPointInside(dataToRemove))
+			{
+				result = Remove(children[2], dataToRemove);
+			}
+
+			if (children[3].Bounds != null && children[3].Bounds.IsPointInside(dataToRemove))
+			{
+				result = Remove(children[3], dataToRemove);
+			}
+
+			if (result == true)
+			{
+				if (children[0].Elements.Count() == 0 &&
+					children[1].Elements.Count() == 0 &&
+					children[2].Elements.Count() == 0 &&
+					children[3].Elements.Count() == 0)
+				{
+					currentNode.Children = null;
+				}
+
+				return true;
+			}
+		}
+		else
+		{
+			return currentNode.Elements.Remove(dataToRemove);
+		}
+
+		return false;
+	}
+
+	public void Insert(T data)
+	{
+		Insert(_root, data);
+	}
+
+	private void Insert(QuadTreeNode<T> currentNode, T dataToInsert)
+	{
+		if (!currentNode.Bounds.IsPointInside(dataToInsert))
+		{
+			return;
+		}
+
+		if (currentNode.Children == null)
+		{
+			List<T> elementsToSplite = new();
+			currentNode.Elements.Add(dataToInsert);
+
+			if (currentNode.Elements.Count() < _nodeCapacity)
 			{
 				return;
 			}
 			else
 			{
-				// current node needs to be splitted
-				nodes_to_insert = in_current_node.Data;
-
-				// remove data
-				in_current_node.Data = new();
+				elementsToSplite = currentNode.Elements;
+				currentNode.Elements = new();
 			}
+
+			var bounds = currentNode.Bounds;
+			float half = bounds.HalfSize / 2;
+
+			currentNode.Children = [
+				new QuadTreeNode<T>(new QuadTreeRect(bounds.CenterX - half, bounds.CenterY - half, half)),
+				new QuadTreeNode<T>(new QuadTreeRect(bounds.CenterX + half, bounds.CenterY - half, half)),
+				new QuadTreeNode<T>(new QuadTreeRect(bounds.CenterX - half, bounds.CenterY + half, half)),
+				new QuadTreeNode<T>(new QuadTreeRect(bounds.CenterX + half, bounds.CenterY + half, half))
+			];
+
+			elementsToSplite.ForEach(element =>
+			{
+				int quad = bounds.GetQuadrantIndex(dataToInsert);
+
+				Insert(currentNode.Children[quad], element);
+			});
 		}
 		else
 		{
-			// move downward on the tree following the apropriate quadrant
-			quadrant = in_current_node.Bounds.GetQuadrantIndex(in_node_to_insert.Data);
+			int quad = currentNode.Bounds.GetQuadrantIndex(dataToInsert);
 
-			Insert(in_current_node.Children[quadrant], in_node_to_insert);
-
-			return;
+			Insert(currentNode.Children[quad], dataToInsert);
 		}
-
-		// subdivide current node
-		QuadTreeRegion bounds = in_current_node.Bounds;
-		float half = bounds.HalfSize / 2;
-		var subdivision = new QuadTreeNode<T>[4] {
-			new QuadTreeNode<T>(new QuadTreeRegion(bounds.CenterX - half, bounds.CenterY - half, half)),
-			new QuadTreeNode<T>(new QuadTreeRegion(bounds.CenterX + half, bounds.CenterY - half, half )),
-			new QuadTreeNode<T>(new QuadTreeRegion(bounds.CenterX - half, bounds.CenterY + half, half )),
-			new QuadTreeNode<T>(new QuadTreeRegion(bounds.CenterX + half, bounds.CenterY + half, half ))
-		};
-
-		// insert node
-		quadrant = bounds.GetQuadrantIndex(in_node_to_insert.Data);
-
-		Insert(subdivision[quadrant], in_node_to_insert);
-
-		// insert nodes from the splitted node
-		foreach (var node in nodes_to_insert)
-		{
-			quadrant = bounds.GetQuadrantIndex(node.Data);
-
-			Insert(subdivision[quadrant], node);
-		}
-
-		in_current_node.Children = subdivision;
-
 	}
 
-	public delegate void NodeProcessCallback(QuadTreeRegion in_bounds);
+	public delegate void NodeProcessCallback(QuadTreeRect in_bounds);
 	public delegate void DataProcessCallback(T in_data);
 
-	public void TraverseNodesAndLeafs(DataProcessCallback in_data_process_callback, NodeProcessCallback in_node_process_callback)
+	public void TraverseNodesAndLeafs(DataProcessCallback dataProcessCallback, NodeProcessCallback nodeProcessCallback)
 	{
 		var stack = new Stack<QuadTreeNode<T>>();
-		QuadTreeNode<T> current = m_root;
+		QuadTreeNode<T> current = _root;
 
 		while (true)
 		{
 			if (current.Children != null)
 			{
-				if (in_node_process_callback != null)
+				foreach (QuadTreeNode<T> node in current.Children)
 				{
-					foreach (QuadTreeNode<T> node in current.Children)
-						in_node_process_callback(node.Bounds);
+					nodeProcessCallback?.Invoke(node.Bounds);
 				}
 
 				stack.Push(current.Children[2]);
@@ -205,66 +225,27 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeData
 			}
 			else
 			{
-				var nodes = current.Data;
-
-				nodes.ForEach(node =>
+				current.Elements.ForEach(element =>
 				{
-					in_data_process_callback(node.Data);
+					dataProcessCallback?.Invoke(element);
 				});
 
 				if (stack.Count > 0)
-					current = stack.Pop();
-				else
-					break;
-			}
-		}
-	}
-
-	public IEnumerable<T> Query(float in_left, float in_top, float in_width, float in_height)
-	{
-		Stack<QuadTreeNode<T>> stack = new Stack<QuadTreeNode<T>>();
-		QuadTreeNode<T> current = m_root;
-
-		while (current != null)
-		{
-			if (current.Children != null)
-			{
-				QuadTreeNode<T>[] children = current.Children;
-
-				if (children[2].Bounds != null && children[2].Bounds.IsOverlapping(in_left, in_top, in_width, in_height))
-					stack.Push(children[2]);
-
-				if (children[1].Bounds != null && children[1].Bounds.IsOverlapping(in_left, in_top, in_width, in_height))
-					stack.Push(children[1]);
-
-				if (children[3].Bounds != null && children[3].Bounds.IsOverlapping(in_left, in_top, in_width, in_height))
-					stack.Push(children[3]);
-
-				if (children[0].Bounds != null && children[0].Bounds.IsOverlapping(in_left, in_top, in_width, in_height))
-					stack.Push(children[0]);
-			}
-			else
-			{
-				var nodes = current.Data;
-
-				foreach (var node in nodes)
 				{
-					if (node.Data.X > in_left && node.Data.X < in_left + in_width && node.Data.Y > in_top && node.Data.Y < in_top + in_height)
-						yield return node.Data;
+					current = stack.Pop();
+				}
+				else
+				{
+					break;
 				}
 			}
-
-			if (stack.Count > 0)
-				current = stack.Pop();
-			else
-				break;
 		}
 	}
 
 	public IEnumerator<T> GetEnumerator()
 	{
-		Stack<QuadTreeNode<T>> stack = new Stack<QuadTreeNode<T>>();
-		QuadTreeNode<T> current = m_root;
+		var stack = new Stack<QuadTreeNode<T>>();
+		var current = _root;
 
 		while (current != null)
 		{
@@ -277,18 +258,20 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeData
 			}
 			else
 			{
-				var nodes = current.Data;
-
-				foreach (var node in nodes)
+				foreach (var element in current.Elements)
 				{
-					yield return node.Data;
+					yield return element;
 				}
 			}
 
 			if (stack.Count > 0)
+			{
 				current = stack.Pop();
+			}
 			else
+			{
 				break;
+			}
 		}
 	}
 
@@ -297,142 +280,68 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeData
 		return GetEnumerator();
 	}
 
-	public List<T> QueryNeighbours(float in_x, float in_y, int in_neighbours_count)
+	public IEnumerable<T> Query(float centerX, float centerY, float halfSize)
 	{
-		QuadTreeRegion neighbour_region = new QuadTreeRegion(in_x, in_y, 0);
-		Stack<QuadTreeNode<T>> stack = new Stack<QuadTreeNode<T>>();
-		QuadTreeNode<T> current;
+		var rect = new QuadTreeRect(centerX, centerY, halfSize);
 
-		List<T> neighbours = new List<T>();
-		double[] neighbour_distances = new double[in_neighbours_count];
-		double neighbours_worst_distance = 0;
-		int neighbours_worst_index = 0;
-
-		// set root node as current
-		current = m_root;
+		var stack = new Stack<QuadTreeNode<T>>();
+		var current = _root;
 
 		while (current != null)
 		{
-
-			// move downwards if this node has child nodes
 			if (current.Children != null)
 			{
-				// store regions in the stack and continue with the closest region
-				double closest_region_distance;
-				int closest_region_index;
+				var children = current.Children;
 
-				// find closest region
-				closest_region_index = 0;
-				closest_region_distance = current.Children[0].Bounds.GetSquaredDistanceOfCenter(in_x, in_y);
-
-				for (int i = 0; i < 4; i++)
+				if (children[2].Bounds != null && children[2].Bounds.IsOverlapping(rect))
 				{
-					double distance = current.Children[i].Bounds.GetSquaredDistanceOfCenter(in_x, in_y);
-					if (distance < closest_region_distance)
-					{
-						closest_region_distance = distance;
-						closest_region_index = i;
-					}
+					stack.Push(children[2]);
 				}
 
-				// store regions
-				for (int i = 0; i < 4; i++)
+				if (children[1].Bounds != null && children[1].Bounds.IsOverlapping(rect))
 				{
-					if (i == closest_region_index)
-						continue;
-
-					// if the neighbor region is defined then store only the overlapping regions, otherwise store all regions
-					if (neighbour_region.HalfSize == 0 || current.Children[i].Bounds.IsOverlapping(neighbour_region))
-						stack.Push(current.Children[i]);
+					stack.Push(children[1]);
 				}
 
-				// continue processing with the closest	region
-				current = current.Children[closest_region_index];
+				if (children[3].Bounds != null && children[3].Bounds.IsOverlapping(rect))
+				{
+					stack.Push(children[3]);
+				}
+
+				if (children[0].Bounds != null && children[0].Bounds.IsOverlapping(rect))
+				{
+					stack.Push(children[0]);
+				}
 			}
 			else
 			{
-				foreach (var current_leaf_entry in current.Data)
+				foreach (var element in current.Elements)
 				{
-					// calculate distance (squared)
-					double squared_distance = current_leaf_entry.GetSquaredDistance(in_x, in_y);
-
-					if (current.Data != null)
+					if (rect.IsPointInside(element))
 					{
-						// simply store data point if the list is not full
-						if (neighbours.Count < in_neighbours_count)
-						{
-							if (neighbours.Count == 0)
-							{
-								neighbours_worst_distance = squared_distance;
-								neighbours_worst_index = 0;
-							}
-							else
-							{
-								if (squared_distance > neighbours_worst_distance)
-								{
-									neighbours_worst_distance = squared_distance;
-									neighbours_worst_index = neighbours.Count;
-								}
-							}
-
-							// add this item to the neighbours list
-							neighbour_distances[neighbours.Count] = squared_distance;
-							neighbours.Add(current_leaf_entry.Data);
-
-							// if the required number of neighbour is found store the worst distance in the region
-							if (neighbours.Count == in_neighbours_count)
-							{
-								neighbour_region.HalfSize = (float)Math.Sqrt(neighbours_worst_distance);
-							}
-						}
-						else
-						{
-							// list is full, store only when this item is closer than the worst item (largest distance) in the list
-							if (squared_distance < neighbours_worst_distance)
-							{
-								// replace worst element
-								neighbour_distances[neighbours_worst_index] = squared_distance;
-								neighbours[neighbours_worst_index] = current_leaf_entry.Data;
-
-								// find the current worst element
-								neighbours_worst_index = 0;
-								neighbours_worst_distance = neighbour_distances[0];
-								for (int i = 1; i < in_neighbours_count; i++)
-								{
-									if (neighbour_distances[i] > neighbours_worst_distance)
-									{
-										neighbours_worst_distance = neighbour_distances[i];
-										neighbours_worst_index = i;
-									}
-								}
-
-								neighbour_region.HalfSize = (float)Math.Sqrt(neighbours_worst_distance);
-							}
-						}
+						yield return element;
 					}
 				}
+			}
 
-				// get new element from the stack or exit if no more element to investigate
-				do
-				{
-					if (stack.Count > 0)
-					{
-						current = stack.Pop();
-					}
-					else
-					{
-						current = null;
-						break;
-					}
-
-					// if the neighbour region is know skip all elements with a non-overlapping region
-				} while (neighbour_region.HalfSize > 0 && !current.Bounds.IsOverlapping(neighbour_region));
-
-
+			if (stack.Count > 0)
+			{
+				current = stack.Pop();
+			}
+			else
+			{
+				break;
 			}
 		}
+	}
+
+	public IEnumerable<T> QueryNeighbours(float x, float y, int radius, int count)
+	{
+		var neighbours =
+			Query(x, y, radius)
+			.OrderBy(n => n.GetSquaredDistance(x, y))
+			.Take(count);
 
 		return neighbours;
 	}
 }
-
