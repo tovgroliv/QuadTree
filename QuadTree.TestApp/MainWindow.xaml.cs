@@ -122,7 +122,27 @@ namespace QuadTree.TestApp
 							{
 								item.Update();
 								cMainCanvas.Children.Clear();
-								//DrawQuadtree();
+								DrawQuadtree();
+
+								if (cbNeighbourSearch.IsChecked == true && !m_selection_active)
+								{
+									// restore data point color
+									ClearNeighbourMarkers();
+
+									var check = int.TryParse(countSearchField.Text, out var distance);
+
+									if (!check)
+									{
+										distance = 10;
+									}
+
+									m_neighbour_data = m_quadtree.QueryNeighbours((float)_mousePos.X, (float)_mousePos.Y, distance, 100).ToList();
+
+									foreach (TreeData data in m_neighbour_data)
+									{
+										data.Marker.Fill = Brushes.Cyan;
+									}
+								}
 							}));
 						}
 						else
@@ -194,7 +214,7 @@ namespace QuadTree.TestApp
 
 						}
 
-						coundLabel.Text = $"{m_quadtree.Count()}";
+						//coundLabel.Text = $"{m_quadtree.Count()}";
 
 						cMainCanvas.Children.Clear();
 						DrawQuadtree();
@@ -230,9 +250,13 @@ namespace QuadTree.TestApp
 
 		}
 
+		private Point _mousePos;
+
 		private void Canvas_MouseMove(object sender, MouseEventArgs e)
 		{
 			Point current_pos = e.GetPosition(cMainCanvas);
+
+			_mousePos = e.GetPosition(cMainCanvas);
 
 			switch (m_mouse_mode)
 			{
@@ -259,27 +283,27 @@ namespace QuadTree.TestApp
 					NotifyPropertyChanged("SelectionRectangleHeight");
 					break;
 
-				case MouseMode.None:
-					if (cbNeighbourSearch.IsChecked == true && !m_selection_active)
-					{
-						// restore data point color
-						ClearNeighbourMarkers();
+				//case MouseMode.None:
+				//	if (cbNeighbourSearch.IsChecked == true && !m_selection_active)
+				//	{
+				//		// restore data point color
+				//		ClearNeighbourMarkers();
 
-						var check = int.TryParse(countSearchField.Text, out var distance);
+				//		var check = int.TryParse(countSearchField.Text, out var distance);
 
-						if (!check)
-						{
-							distance = 10;
-						}
+				//		if (!check)
+				//		{
+				//			distance = 10;
+				//		}
 
-						m_neighbour_data = m_quadtree.QueryNeighbours((float)current_pos.X, (float)current_pos.Y, distance, 10).ToList();
+				//		m_neighbour_data = m_quadtree.QueryNeighbours((float)current_pos.X, (float)current_pos.Y, distance, 100).ToList();
 
-						foreach (TreeData data in m_neighbour_data)
-						{
-							data.Marker.Fill = Brushes.Cyan;
-						}
-					}
-					break;
+				//		foreach (TreeData data in m_neighbour_data)
+				//		{
+				//			data.Marker.Fill = Brushes.Cyan;
+				//		}
+				//	}
+				//	break;
 
 			}
 		}
@@ -340,7 +364,7 @@ namespace QuadTree.TestApp
 				m_quadtree.Insert(data);
 			}
 
-			coundLabel.Text = $"{m_quadtree.Count()}";
+			//coundLabel.Text = $"{m_quadtree.Count()}";
 
 			cMainCanvas.Children.Clear();
 			DrawQuadtree();

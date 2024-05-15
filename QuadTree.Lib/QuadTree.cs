@@ -37,7 +37,7 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 
 	private bool UpdateRemove(QuadTreeNode<T> currentNode, T dataToRemove, float oldX, float oldY)
 	{
-		if (!currentNode.Bounds.IsPointInside(dataToRemove))
+		if (!currentNode.Bounds.IsPointInside(oldX, oldY))
 		{
 			return false;
 		}
@@ -47,32 +47,29 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 			var children = currentNode.Children;
 			var result = false;
 
-			if (children[0].Bounds != null && children[0].Bounds.IsPointInside(dataToRemove))
+			if (children[0].Bounds != null && children[0].Bounds.IsPointInside(oldX, oldY))
 			{
 				result = UpdateRemove(children[0], dataToRemove, oldX, oldY);
 			}
-
-			if (children[1].Bounds != null && children[1].Bounds.IsPointInside(dataToRemove))
+			else if (children[1].Bounds != null && children[1].Bounds.IsPointInside(oldX, oldY))
 			{
 				result = UpdateRemove(children[1], dataToRemove, oldX, oldY);
 			}
-
-			if (children[2].Bounds != null && children[2].Bounds.IsPointInside(dataToRemove))
+			else if (children[2].Bounds != null && children[2].Bounds.IsPointInside(oldX, oldY))
 			{
 				result = UpdateRemove(children[2], dataToRemove, oldX, oldY);
 			}
-
-			if (children[3].Bounds != null && children[3].Bounds.IsPointInside(dataToRemove))
+			else if (children[3].Bounds != null && children[3].Bounds.IsPointInside(oldX, oldY))
 			{
 				result = UpdateRemove(children[3], dataToRemove, oldX, oldY);
 			}
 
 			if (result == true)
 			{
-				if (children[0].Elements.Count() == 0 &&
-					children[1].Elements.Count() == 0 &&
-					children[2].Elements.Count() == 0 &&
-					children[3].Elements.Count() == 0)
+				if (children[0].Elements.Count() == 0 && children[0].Children == null &&
+					children[1].Elements.Count() == 0 && children[1].Children == null &&
+					children[2].Elements.Count() == 0 && children[2].Children == null &&
+					children[3].Elements.Count() == 0 && children[3].Children == null)
 				{
 					currentNode.Children = null;
 				}
@@ -82,7 +79,7 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 		}
 		else
 		{
-			if (currentNode.Elements.Contains(dataToRemove) && !currentNode.Bounds.IsPointInside(oldX, oldY))
+			if (currentNode.Elements.Contains(dataToRemove) && !currentNode.Bounds.IsPointInside(dataToRemove))
 			{
 				return currentNode.Elements.Remove(dataToRemove);
 			}
@@ -112,28 +109,25 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 			{
 				result = Remove(children[0], dataToRemove);
 			}
-
-			if (children[1].Bounds != null && children[1].Bounds.IsPointInside(dataToRemove))
+			else if (children[1].Bounds != null && children[1].Bounds.IsPointInside(dataToRemove))
 			{
 				result = Remove(children[1], dataToRemove);
 			}
-
-			if (children[2].Bounds != null && children[2].Bounds.IsPointInside(dataToRemove))
+			else if (children[2].Bounds != null && children[2].Bounds.IsPointInside(dataToRemove))
 			{
 				result = Remove(children[2], dataToRemove);
 			}
-
-			if (children[3].Bounds != null && children[3].Bounds.IsPointInside(dataToRemove))
+			else if (children[3].Bounds != null && children[3].Bounds.IsPointInside(dataToRemove))
 			{
 				result = Remove(children[3], dataToRemove);
 			}
 
 			if (result == true)
 			{
-				if (children[0].Elements.Count() == 0 &&
-					children[1].Elements.Count() == 0 &&
-					children[2].Elements.Count() == 0 &&
-					children[3].Elements.Count() == 0)
+				if (children[0].Elements.Count() == 0 && children[0].Children == null &&
+					children[1].Elements.Count() == 0 && children[1].Children == null &&
+					children[2].Elements.Count() == 0 && children[2].Children == null &&
+					children[3].Elements.Count() == 0 && children[3].Children == null)
 				{
 					currentNode.Children = null;
 				}
@@ -258,7 +252,7 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 			}
 			else
 			{
-				foreach (var element in current.Elements)
+				foreach (var element in current.Elements.ToList())
 				{
 					yield return element;
 				}
@@ -337,9 +331,11 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 
 	public IEnumerable<T> QueryNeighbours(float x, float y, int radius, int count)
 	{
+		var squaredRadius = radius * radius;
 		var neighbours =
 			Query(x, y, radius)
 			.OrderBy(n => n.GetSquaredDistance(x, y))
+			.Where(n => n.GetSquaredDistance(x, y) <= squaredRadius)
 			.Take(count);
 
 		return neighbours;
