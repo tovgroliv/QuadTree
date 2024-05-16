@@ -13,10 +13,17 @@
 		</Grid.ColumnDefinitions>
 
 		<Canvas
+			x:Name="cRectCanvas"
+			IsHitTestVisible="false"
+			Grid.Column="0"
+			Width="560" Height="560"
+			Background="LightGray" />
+
+		<Canvas
 			x:Name="cMainCanvas"
 			Grid.Column="0"
 			Width="560" Height="560"
-			Background="LightGray"
+			Background="Transparent"
 			MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
 			MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
 			MouseMove="Canvas_MouseMove" />

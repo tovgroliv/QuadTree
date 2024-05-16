@@ -73,13 +73,23 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 				{
 					currentNode.Children = null;
 				}
+				if (children[0].Elements.Count() + children[1].Elements.Count() + children[2].Elements.Count() + children[3].Elements.Count() < _nodeCapacity &&
+					children[0].Children == null && children[1].Children == null && children[2].Children == null && children[3].Children == null)
+				{
+					children[0].Elements.ForEach(e => currentNode.Elements.Add(e));
+					children[1].Elements.ForEach(e => currentNode.Elements.Add(e));
+					children[2].Elements.ForEach(e => currentNode.Elements.Add(e));
+					children[3].Elements.ForEach(e => currentNode.Elements.Add(e));
+
+					currentNode.Children = null;
+				}
 
 				return true;
 			}
 		}
 		else
 		{
-			if (currentNode.Elements.Contains(dataToRemove) && !currentNode.Bounds.IsPointInside(dataToRemove))
+			//if (currentNode.Elements.Contains(dataToRemove) && !currentNode.Bounds.IsPointInside(dataToRemove))
 			{
 				return currentNode.Elements.Remove(dataToRemove);
 			}
@@ -129,6 +139,16 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 					children[2].Elements.Count() == 0 && children[2].Children == null &&
 					children[3].Elements.Count() == 0 && children[3].Children == null)
 				{
+					currentNode.Children = null;
+				}
+				if (children[0].Elements.Count() + children[1].Elements.Count() + children[2].Elements.Count() + children[3].Elements.Count() < _nodeCapacity &&
+					children[0].Children == null && children[1].Children == null && children[2].Children == null && children[3].Children == null)
+				{
+					children[0].Elements.ForEach(e => currentNode.Elements.Add(e));
+					children[1].Elements.ForEach(e => currentNode.Elements.Add(e));
+					children[2].Elements.ForEach(e => currentNode.Elements.Add(e));
+					children[3].Elements.ForEach(e => currentNode.Elements.Add(e));
+
 					currentNode.Children = null;
 				}
 
@@ -182,7 +202,7 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 
 			elementsToSplite.ForEach(element =>
 			{
-				int quad = bounds.GetQuadrantIndex(dataToInsert);
+				int quad = bounds.GetQuadrantIndex(element);
 
 				Insert(currentNode.Children[quad], element);
 			});

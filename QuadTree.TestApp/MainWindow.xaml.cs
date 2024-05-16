@@ -122,6 +122,7 @@ namespace QuadTree.TestApp
 							{
 								item.Update();
 								cMainCanvas.Children.Clear();
+								cRectCanvas.Children.Clear();
 								DrawQuadtree();
 
 								if (cbNeighbourSearch.IsChecked == true && !m_selection_active)
@@ -157,6 +158,7 @@ namespace QuadTree.TestApp
 		private void DrawQuadtree()
 		{
 			m_quadtree.TraverseNodesAndLeafs(DrawQuadTreeLeaf, DrawQuadTreeNode);
+			coundLabel.Text = $"{cMainCanvas.Children.Count}";
 		}
 
 		private void DrawQuadTreeNode(QuadTreeRect in_bounds)
@@ -172,7 +174,7 @@ namespace QuadTree.TestApp
 			rect.SetValue(Canvas.LeftProperty, (double)(in_bounds.CenterX - in_bounds.HalfSize));
 			rect.SetValue(Canvas.TopProperty, (double)(in_bounds.CenterY - in_bounds.HalfSize));
 			rect.SetValue(Panel.ZIndexProperty, 0);
-			cMainCanvas.Children.Add(rect);
+			cRectCanvas.Children.Add(rect);
 
 		}
 
@@ -185,6 +187,7 @@ namespace QuadTree.TestApp
 		{
 			m_quadtree.Clear();
 			cMainCanvas.Children.Clear();
+			cRectCanvas.Children.Clear();
 		}
 
 		private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -217,6 +220,7 @@ namespace QuadTree.TestApp
 						//coundLabel.Text = $"{m_quadtree.Count()}";
 
 						cMainCanvas.Children.Clear();
+						cRectCanvas.Children.Clear();
 						DrawQuadtree();
 
 						m_mouse_mode = MouseMode.None;
@@ -367,6 +371,7 @@ namespace QuadTree.TestApp
 			//coundLabel.Text = $"{m_quadtree.Count()}";
 
 			cMainCanvas.Children.Clear();
+			cRectCanvas.Children.Clear();
 			DrawQuadtree();
 
 		}
