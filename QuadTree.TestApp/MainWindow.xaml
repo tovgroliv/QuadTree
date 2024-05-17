@@ -5,77 +5,88 @@
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:local="clr-namespace:QuadTree.TestApp"
 		mc:Ignorable="d"
-		Title="MainWindow" Height="600" Width="800">
+		ResizeMode="NoResize"
+		WindowStartupLocation="CenterScreen"
+		Title="QuadTree.Lib Test" Height="560" Width="800">
 	<Grid Margin="10" x:Name="gMain">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="Auto" />
 			<ColumnDefinition />
 		</Grid.ColumnDefinitions>
 
-		<Canvas
-			x:Name="cRectCanvas"
-			IsHitTestVisible="false"
-			Grid.Column="0"
-			Width="560" Height="560"
-			Background="LightGray" />
+		<Grid VerticalAlignment="Top">
+			<Canvas
+				x:Name="cRectCanvas"
+				IsHitTestVisible="false"
+				Grid.Column="0"
+				Width="500" Height="500"
+				Background="LightGray" />
 
-		<Canvas
-			x:Name="cMainCanvas"
-			Grid.Column="0"
-			Width="560" Height="560"
-			Background="Transparent"
-			MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
-			MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
-			MouseMove="Canvas_MouseMove" />
-
-		<Canvas
-			Background="Transparent"
-			IsHitTestVisible="false"
-			HorizontalAlignment="Center"
-			Height="560" Width="560" ClipToBounds="True" >
-			<Rectangle Canvas.Top="{Binding SelectionRectangleTop}" Canvas.Left="{Binding SelectionRectangleLeft}" Stroke="Black" Height="{Binding SelectionRectangleHeight}" Width="{Binding SelectionRectangleWidth}" Visibility="{Binding SelectionRectangleVisibility}" StrokeThickness="1" />
-		</Canvas>
+			<Canvas
+				x:Name="cMainCanvas"
+				Grid.Column="0"
+				Width="500" Height="500"
+				Background="Transparent"
+				MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
+				MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
+				MouseMove="Canvas_MouseMove" />
+		</Grid>
 
 		<StackPanel Grid.Column="1" Margin="10,0,0,0">
-			<TextBlock Text="Настройки" />
-			<GroupBox Header="Добавить рандомно">
-				<StackPanel>
-					<TextBox x:Name="countRandomField" />
-					<Button Content="Выполнить" Click="AddRandomButton_Click" />
-				</StackPanel>
-			</GroupBox>
-			<GroupBox Header="Ближайшие точки">
+			<TextBlock Margin="5,0,5,5" Text="Settings" FontWeight="Bold" HorizontalAlignment="Stretch" TextAlignment="Center" />
+			<GroupBox Header="Random">
 				<StackPanel>
 					<Grid>
 						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" MinWidth="100"  />
 							<ColumnDefinition Width="*" />
 						</Grid.ColumnDefinitions>
-						<TextBlock Grid.Column="0" Text="Количество" />
+						<TextBlock Margin="5" Grid.Column="0" Text="Count" />
+						<TextBox Margin="5" Grid.Column="1" x:Name="countRandomField" />
+					</Grid>
+					<Button Margin="5,0,5,5" Content="Add" Click="AddRandomButton_Click" />
+				</StackPanel>
+			</GroupBox>
+			<GroupBox Header="Neighbour Search">
+				<StackPanel>
+					<Grid Margin="5">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" MinWidth="100" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+						<TextBlock Grid.Column="0" Text="Distance" />
+						<TextBox Grid.Column="1" x:Name="distanceSearchField" />
+					</Grid>
+					<Grid Margin="5,0,5,5">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" MinWidth="100"  />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+						<TextBlock Grid.Column="0" Text="Count" />
 						<TextBox Grid.Column="1" x:Name="countSearchField" />
 					</Grid>
-					<CheckBox x:Name="cbNeighbourSearch" Content="Поиск ближайших точек" />
+					<ToggleButton Margin="5,0,5,5" x:Name="cbNeighbourSearch" Content="Search" />
 				</StackPanel>
 			</GroupBox>
-			<GroupBox Header="Поле">
+			<GroupBox Header="Scene">
 				<StackPanel>
-					<Grid>
+					<Grid Margin="5">
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="Auto" />
 							<ColumnDefinition Width="*" />
 						</Grid.ColumnDefinitions>
-						<TextBlock Grid.Column="0" Text="Всего элементов - " />
-						<TextBlock x:Name="coundLabel" Grid.Column="1" Text="0" />
+						<TextBlock Grid.Column="0" Text="Total count - " />
+						<TextBlock  x:Name="coundLabel" Grid.Column="1" Text="0" />
 					</Grid>
-					<Button Content="Очистить выделение" Click="DeselectButton_Click" />
-					<Button Content="Очистить поле" Click="ClearButton_Click" />
-				</StackPanel>
-			</GroupBox>
-			<GroupBox Header="Закрыть приложение">
-				<StackPanel>
-					<Button Content="Выполнить" Click="ExitButton_Click" />
+					<Button Margin="5,0,5,5" Content="Clean selection" Click="DeselectButton_Click" />
+					<Button Margin="5,0,5,5" Content="Clean" Click="ClearButton_Click" />
 				</StackPanel>
 			</GroupBox>
 		</StackPanel>
+		<TextBlock Grid.Column="1" VerticalAlignment="Bottom" TextAlignment="Center">           
+			<Hyperlink NavigateUri="https://github.com/tovgroliv/QuadTree" RequestNavigate="Hyperlink_RequestNavigate">
+				Open on GitHub
+			</Hyperlink>
+		</TextBlock>
 	</Grid>
 </Window>

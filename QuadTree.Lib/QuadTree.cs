@@ -1,6 +1,7 @@
 ﻿using QuadTree.Lib.Entities;
 using QuadTree.Lib.Interfaces;
 using System.Collections;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace QuadTree.Lib;
 
@@ -25,142 +26,122 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 		_root.Elements = new();
 	}
 
-	public bool Update(T data, float oldX, float oldY)
+	public void Update(T data, float oldX, float oldY)
 	{
-		if (UpdateRemove(_root, data, oldX, oldY))
-		{
-			Insert(data);
-			return true;
-		}
-		return false;
+		UpdateRemove(_root, data, oldX, oldY);
 	}
 
-	private bool UpdateRemove(QuadTreeNode<T> currentNode, T dataToRemove, float oldX, float oldY)
+	private void UpdateRemove(QuadTreeNode<T> currentNode, T dataToRemove, float oldX, float oldY)
 	{
 		if (!currentNode.Bounds.IsPointInside(oldX, oldY))
 		{
-			return false;
+			return;
 		}
 
 		if (currentNode.Children != null)
 		{
 			var children = currentNode.Children;
-			var result = false;
 
 			if (children[0].Bounds != null && children[0].Bounds.IsPointInside(oldX, oldY))
 			{
-				result = UpdateRemove(children[0], dataToRemove, oldX, oldY);
+				UpdateRemove(children[0], dataToRemove, oldX, oldY);
 			}
 			else if (children[1].Bounds != null && children[1].Bounds.IsPointInside(oldX, oldY))
 			{
-				result = UpdateRemove(children[1], dataToRemove, oldX, oldY);
+				UpdateRemove(children[1], dataToRemove, oldX, oldY);
 			}
 			else if (children[2].Bounds != null && children[2].Bounds.IsPointInside(oldX, oldY))
 			{
-				result = UpdateRemove(children[2], dataToRemove, oldX, oldY);
+				UpdateRemove(children[2], dataToRemove, oldX, oldY);
 			}
 			else if (children[3].Bounds != null && children[3].Bounds.IsPointInside(oldX, oldY))
 			{
-				result = UpdateRemove(children[3], dataToRemove, oldX, oldY);
+				UpdateRemove(children[3], dataToRemove, oldX, oldY);
 			}
 
-			if (result == true)
+			if (children[0].Elements.Count() == 0 && children[0].Children == null &&
+				children[1].Elements.Count() == 0 && children[1].Children == null &&
+				children[2].Elements.Count() == 0 && children[2].Children == null &&
+				children[3].Elements.Count() == 0 && children[3].Children == null)
 			{
-				if (children[0].Elements.Count() == 0 && children[0].Children == null &&
-					children[1].Elements.Count() == 0 && children[1].Children == null &&
-					children[2].Elements.Count() == 0 && children[2].Children == null &&
-					children[3].Elements.Count() == 0 && children[3].Children == null)
-				{
-					currentNode.Children = null;
-				}
-				if (children[0].Elements.Count() + children[1].Elements.Count() + children[2].Elements.Count() + children[3].Elements.Count() < _nodeCapacity &&
-					children[0].Children == null && children[1].Children == null && children[2].Children == null && children[3].Children == null)
-				{
-					children[0].Elements.ForEach(e => currentNode.Elements.Add(e));
-					children[1].Elements.ForEach(e => currentNode.Elements.Add(e));
-					children[2].Elements.ForEach(e => currentNode.Elements.Add(e));
-					children[3].Elements.ForEach(e => currentNode.Elements.Add(e));
+				currentNode.Children = null;
+			}
+			if (children[0].Elements.Count() + children[1].Elements.Count() + children[2].Elements.Count() + children[3].Elements.Count() < _nodeCapacity &&
+				children[0].Children == null && children[1].Children == null && children[2].Children == null && children[3].Children == null)
+			{
+				children[0].Elements.ForEach(e => currentNode.Elements.Add(e));
+				children[1].Elements.ForEach(e => currentNode.Elements.Add(e));
+				children[2].Elements.ForEach(e => currentNode.Elements.Add(e));
+				children[3].Elements.ForEach(e => currentNode.Elements.Add(e));
 
-					currentNode.Children = null;
-				}
-
-				return true;
+				currentNode.Children = null;
 			}
 		}
 		else
 		{
-			//if (currentNode.Elements.Contains(dataToRemove) && !currentNode.Bounds.IsPointInside(dataToRemove))
+			//if (!currentNode.Bounds.IsPointInside(dataToRemove))
 			{
-				return currentNode.Elements.Remove(dataToRemove);
+				currentNode.Elements.Remove(dataToRemove);
+				Insert(dataToRemove);
 			}
 		}
-
-		return false;
 	}
 
-	public bool Remove(T data)
+	public void Remove(T data)
 	{
-		return Remove(_root, data);
+		Remove(_root, data);
 	}
 
-	private bool Remove(QuadTreeNode<T> currentNode, T dataToRemove)
+	private void Remove(QuadTreeNode<T> currentNode, T dataToRemove)
 	{
 		if (!currentNode.Bounds.IsPointInside(dataToRemove))
 		{
-			return false;
+			return;
 		}
 
 		if (currentNode.Children != null)
 		{
 			var children = currentNode.Children;
-			var result = false;
 
 			if (children[0].Bounds != null && children[0].Bounds.IsPointInside(dataToRemove))
 			{
-				result = Remove(children[0], dataToRemove);
+				Remove(children[0], dataToRemove);
 			}
 			else if (children[1].Bounds != null && children[1].Bounds.IsPointInside(dataToRemove))
 			{
-				result = Remove(children[1], dataToRemove);
+				Remove(children[1], dataToRemove);
 			}
 			else if (children[2].Bounds != null && children[2].Bounds.IsPointInside(dataToRemove))
 			{
-				result = Remove(children[2], dataToRemove);
+				Remove(children[2], dataToRemove);
 			}
 			else if (children[3].Bounds != null && children[3].Bounds.IsPointInside(dataToRemove))
 			{
-				result = Remove(children[3], dataToRemove);
+				Remove(children[3], dataToRemove);
 			}
 
-			if (result == true)
+			if (children[0].Elements.Count() == 0 && children[0].Children == null &&
+				children[1].Elements.Count() == 0 && children[1].Children == null &&
+				children[2].Elements.Count() == 0 && children[2].Children == null &&
+				children[3].Elements.Count() == 0 && children[3].Children == null)
 			{
-				if (children[0].Elements.Count() == 0 && children[0].Children == null &&
-					children[1].Elements.Count() == 0 && children[1].Children == null &&
-					children[2].Elements.Count() == 0 && children[2].Children == null &&
-					children[3].Elements.Count() == 0 && children[3].Children == null)
-				{
-					currentNode.Children = null;
-				}
-				if (children[0].Elements.Count() + children[1].Elements.Count() + children[2].Elements.Count() + children[3].Elements.Count() < _nodeCapacity &&
-					children[0].Children == null && children[1].Children == null && children[2].Children == null && children[3].Children == null)
-				{
-					children[0].Elements.ForEach(e => currentNode.Elements.Add(e));
-					children[1].Elements.ForEach(e => currentNode.Elements.Add(e));
-					children[2].Elements.ForEach(e => currentNode.Elements.Add(e));
-					children[3].Elements.ForEach(e => currentNode.Elements.Add(e));
+				currentNode.Children = null;
+			}
+			if (children[0].Elements.Count() + children[1].Elements.Count() + children[2].Elements.Count() + children[3].Elements.Count() < _nodeCapacity &&
+				children[0].Children == null && children[1].Children == null && children[2].Children == null && children[3].Children == null)
+			{
+				children[0].Elements.ForEach(e => currentNode.Elements.Add(e));
+				children[1].Elements.ForEach(e => currentNode.Elements.Add(e));
+				children[2].Elements.ForEach(e => currentNode.Elements.Add(e));
+				children[3].Elements.ForEach(e => currentNode.Elements.Add(e));
 
-					currentNode.Children = null;
-				}
-
-				return true;
+				currentNode.Children = null;
 			}
 		}
 		else
 		{
-			return currentNode.Elements.Remove(dataToRemove);
+			currentNode.Elements.Remove(dataToRemove);
 		}
-
-		return false;
 	}
 
 	public void Insert(T data)
@@ -218,7 +199,7 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 	public delegate void NodeProcessCallback(QuadTreeRect in_bounds);
 	public delegate void DataProcessCallback(T in_data);
 
-	public void TraverseNodesAndLeafs(DataProcessCallback dataProcessCallback, NodeProcessCallback nodeProcessCallback)
+	public void TraverseNodesAndLeafs(DataProcessCallback? dataProcessCallback, NodeProcessCallback nodeProcessCallback)
 	{
 		var stack = new Stack<QuadTreeNode<T>>();
 		QuadTreeNode<T> current = _root;
@@ -239,10 +220,13 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 			}
 			else
 			{
-				current.Elements.ForEach(element =>
+				if (dataProcessCallback != null)
 				{
-					dataProcessCallback?.Invoke(element);
-				});
+					current.Elements.ForEach(element =>
+					{
+						dataProcessCallback?.Invoke(element);
+					});
+				}
 
 				if (stack.Count > 0)
 				{
@@ -272,7 +256,7 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 			}
 			else
 			{
-				foreach (var element in current.Elements.ToList())
+				foreach (var element in current.Elements)
 				{
 					yield return element;
 				}
@@ -352,12 +336,16 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 	public IEnumerable<T> QueryNeighbours(float x, float y, int radius, int count)
 	{
 		var squaredRadius = radius * radius;
-		var neighbours =
-			Query(x, y, radius)
-			.OrderBy(n => n.GetSquaredDistance(x, y))
-			.Where(n => n.GetSquaredDistance(x, y) <= squaredRadius)
+		var neighbours = Query(x, y, radius)
+			.OrderBy(n => GetSquaredDistance(n, x, y))
+			.Where(n => GetSquaredDistance(n, x, y) <= squaredRadius)
 			.Take(count);
 
 		return neighbours;
+	}
+
+	public double GetSquaredDistance(T data, float x, float y)
+	{
+		return (data.X - x) * (data.X - x) + (data.Y - y) * (data.Y - y);
 	}
 }
