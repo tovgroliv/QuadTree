@@ -12,4 +12,10 @@
     <ProjectReference Include="..\QuadTree.Lib\QuadTree.Lib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="logo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

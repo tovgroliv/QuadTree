@@ -26,6 +26,7 @@ public partial class MainWindow : Window
 
 		public float X { get; set; }
 		public float Y { get; set; }
+		public IQuadTreeNode ParentNode { get; set; }
 
 		public TreeData(float in_x, float in_y)
 		{
@@ -49,7 +50,7 @@ public partial class MainWindow : Window
 			Y = in_y;
 		}
 
-		public void Update()
+		public void UpdateMarker()
 		{
 			Marker.SetValue(Canvas.LeftProperty, X - 2.5);
 			Marker.SetValue(Canvas.TopProperty, Y - 2.5);
@@ -117,7 +118,8 @@ public partial class MainWindow : Window
 						item.SpeedY *= -1;
 					}
 
-					m_quadtree.Update(item, oldX, oldY);
+					//item.Update?.Invoke(oldX, oldY);
+					m_quadtree.Update(item);
 				}
 				foreach (var item in m_quadtree.ToList())
 				{
@@ -125,7 +127,7 @@ public partial class MainWindow : Window
 					{
 						Application.Current.Dispatcher.Invoke(new Action(() =>
 						{
-							item.Update();
+							item.UpdateMarker();
 							cRectCanvas.Children.Clear();
 							m_quadtree.TraverseNodesAndLeafs(null, DrawQuadTreeNode);
 						}));
@@ -145,7 +147,7 @@ public partial class MainWindow : Window
 		coundLabel.Text = $"{cMainCanvas.Children.Count}";
 	}
 
-	private void DrawQuadTreeNode(QuadTreeRect in_bounds)
+	private void DrawQuadTreeNode(IQuadTreeRect in_bounds)
 	{
 		var rect = new Rectangle()
 		{

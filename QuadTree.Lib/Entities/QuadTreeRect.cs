@@ -2,12 +2,12 @@
 
 namespace QuadTree.Lib.Entities;
 
-public class QuadTreeRect
+internal class QuadTreeRect : IQuadTreeRect
 {
-	public float CenterX;
-	public float CenterY;
+	public float CenterX { get; set; }
+	public float CenterY { get; set; }
 
-	public float HalfSize;
+	public float HalfSize { get; set; }
 
 	public QuadTreeRect(float centerX, float centerY, float halfSize)
 	{
@@ -26,7 +26,7 @@ public class QuadTreeRect
 		return Math.Abs(CenterX - x) <= HalfSize && Math.Abs(CenterY - y) <= HalfSize;
 	}
 
-	public bool IsOverlapping(QuadTreeRect in_region)
+	public bool IsOverlapping(IQuadTreeRect in_region)
 	{
 		return Math.Abs(CenterX - in_region.CenterX) <= in_region.HalfSize + HalfSize && Math.Abs(CenterY - in_region.CenterY) <= in_region.HalfSize + HalfSize;
 	}
