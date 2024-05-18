@@ -1,4 +1,5 @@
-<div style="width: 100%;display: flex;justify-content: center;flex-direction: column;align-items: center;"><img src="Resources/logo.png" alt="drawing" width="100"/><h1>QuadTree C#</h1></div>
+<p align="center"><img src="Resources/logo.png" alt="drawing" width="100"/></p>
+<h1 align="center">QuadTree C#</h1>
 
 ## Table of context
 
