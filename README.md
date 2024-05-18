@@ -1,7 +1,4 @@
-<div style="width: 100%;display: flex;justify-content: center;flex-direction: column;align-items: center;">
-	<img src="Resources/logo.png" alt="drawing" width="100"/>
-	<h1>QuadTree C#</h1>
-</div>
+<div style="width: 100%;display: flex;justify-content: center;flex-direction: column;align-items: center;"><img src="Resources/logo.png" alt="drawing" width="100"/><h1>QuadTree C#</h1></div>
 
 ## Table of context
 
@@ -75,15 +72,13 @@ class Program
 
 ## Demo
 
-<div style="width: 100%;display: flex;justify-content: center;flex-direction: column;align-items: center;">
-	<img src="Resources/DynamicTest.png" alt="drawing" />
-	<i>QuadTree C#</i>
-</div>
+<center><i>Desktop test app</i></center>
 
-<div style="width: 100%;display: flex;justify-content: center;flex-direction: column;align-items: center;">
-	<img src="Resources/ConsoleTest.png" alt="drawing" />
-	<i>QuadTree C#</i>
-</div>
+![Desktop test app](Resources/DynamicTest.png)
+
+<center><i>Console test app</i></center>
+
+![Console test app](Resources/ConsoleTest.png)
 
 ## Resources
 
