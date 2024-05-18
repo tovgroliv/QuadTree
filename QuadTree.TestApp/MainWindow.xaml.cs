@@ -1,9 +1,7 @@
 ﻿using QuadTree.Lib;
-using QuadTree.Lib.Entities;
 using QuadTree.Lib.Interfaces;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Security.Policy;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -15,9 +13,7 @@ namespace QuadTree.TestApp;
 
 public partial class MainWindow : Window
 {
-	enum MouseMode { None, Point, Selection };
-
-	public class TreeData : IQuadTreeItem
+	public class Item : IQuadTreeItem
 	{
 		public Ellipse Marker;
 
@@ -28,7 +24,7 @@ public partial class MainWindow : Window
 		public float Y { get; set; }
 		public IQuadTreeNode ParentNode { get; set; }
 
-		public TreeData(float in_x, float in_y)
+		public Item(float in_x, float in_y)
 		{
 			var random = new Random();
 			SpeedX *= Math.Sign(random.Next(-1, 1) == 0 ? 1 : -1);
@@ -58,20 +54,9 @@ public partial class MainWindow : Window
 	}
 
 
-	QuadTree<TreeData> m_quadtree;
+	QuadTree<Item> m_quadtree;
 
-	public event PropertyChangedEventHandler PropertyChanged;
-
-	public double SelectionRectangleLeft { get; internal set; } = 100;
-	public double SelectionRectangleTop { get; internal set; } = 100;
-	public double SelectionRectangleWidth { get; internal set; } = 200;
-	public double SelectionRectangleHeight { get; internal set; } = 200;
-	public Visibility SelectionRectangleVisibility { get; internal set; } = Visibility.Hidden;
-	private MouseMode m_mouse_mode = MouseMode.None;
-	private List<TreeData> m_neighbour_data = null;
-
-	public Point m_selection_rectangle_start;
-	public bool m_selection_active = false;
+	private List<Item> m_neighbour_data = null;
 
 	public Random m_rnd = new Random(DateTime.Now.Millisecond);
 
@@ -85,7 +70,7 @@ public partial class MainWindow : Window
 
 		_width = (int)cMainCanvas.Width;
 
-		m_quadtree = new QuadTree<TreeData>((float)_width / 2, (float)_width / 2, (float)_width / 2, 4);
+		m_quadtree = new QuadTree<Item>((float)_width / 2, (float)_width / 2, (float)_width / 2, 4);
 
 		this.Closing += (s,e) => _work = false;
 
@@ -98,7 +83,7 @@ public partial class MainWindow : Window
 	{
 		while (_work)
 		{
-			Thread.Sleep(100);
+			Thread.Sleep(40);
 
 			lock (m_quadtree)
 			{
@@ -118,7 +103,6 @@ public partial class MainWindow : Window
 						item.SpeedY *= -1;
 					}
 
-					//item.Update?.Invoke(oldX, oldY);
 					m_quadtree.Update(item);
 				}
 				foreach (var item in m_quadtree.ToList())
@@ -130,6 +114,31 @@ public partial class MainWindow : Window
 							item.UpdateMarker();
 							cRectCanvas.Children.Clear();
 							m_quadtree.TraverseNodesAndLeafs(null, DrawQuadTreeNode);
+
+							if (cbNeighbourSearch.IsChecked == true)
+							{
+								ClearNeighbourMarkers();
+
+								var checkDistance = int.TryParse(distanceSearchField.Text, out var distance);
+								var checkCount = int.TryParse(countSearchField.Text, out var count);
+
+								if (!checkDistance)
+								{
+									distance = 50;
+								}
+
+								if (!checkCount)
+								{
+									count = 10;
+								}
+
+								m_neighbour_data = m_quadtree.QueryNeighbours((float)current_pos.X, (float)current_pos.Y, distance, count).ToList();
+
+								foreach (Item data in m_neighbour_data)
+								{
+									data.Marker.Fill = Brushes.Cyan;
+								}
+							}
 						}));
 					}
 					else
@@ -140,6 +149,8 @@ public partial class MainWindow : Window
 			}
 		}
 	}
+
+	Point current_pos;
 
 	private void DrawQuadtree()
 	{
@@ -164,7 +175,7 @@ public partial class MainWindow : Window
 
 	}
 
-	private void DrawQuadTreeLeaf(TreeData in_data)
+	private void DrawQuadTreeLeaf(Item in_data)
 	{
 		cMainCanvas.Children.Add((Ellipse)in_data.Marker);
 	}
@@ -176,82 +187,16 @@ public partial class MainWindow : Window
 		cRectCanvas.Children.Clear();
 	}
 
-	private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-	{
-		m_selection_rectangle_start = e.GetPosition(cMainCanvas);
-		m_mouse_mode = MouseMode.Point;
-		Mouse.Capture(cMainCanvas);
-	}
-
-	private void Canvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-	{
-		var pos = Mouse.GetPosition(cMainCanvas);
-		Mouse.Capture(null);
-
-		switch (m_mouse_mode)
-		{
-			case MouseMode.Point:
-				{
-					TreeData data = new TreeData((float)pos.X, (float)pos.Y);
-
-					m_quadtree.Insert(data);
-
-					cMainCanvas.Children.Clear();
-					cRectCanvas.Children.Clear();
-					DrawQuadtree();
-
-					m_mouse_mode = MouseMode.None;
-				}
-				break;
-		}
-
-	}
-
 	private void Canvas_MouseMove(object sender, MouseEventArgs e)
 	{
-		Point current_pos = e.GetPosition(cMainCanvas);
-
-		switch (m_mouse_mode)
-		{
-			case MouseMode.Point:
-				SelectionRectangleLeft = m_selection_rectangle_start.X;
-				SelectionRectangleTop = m_selection_rectangle_start.Y;
-				SelectionRectangleWidth = 0;
-				SelectionRectangleHeight = 0;
-				SelectionRectangleVisibility = Visibility.Visible;
-
-				m_mouse_mode = MouseMode.Selection;
-				break;
-
-			case MouseMode.None:
-				if (cbNeighbourSearch.IsChecked == true && !m_selection_active)
-				{
-					ClearNeighbourMarkers();
-
-					var check = int.TryParse(countSearchField.Text, out var distance);
-
-					if (!check)
-					{
-						distance = 10;
-					}
-
-					m_neighbour_data = m_quadtree.QueryNeighbours((float)current_pos.X, (float)current_pos.Y, distance, 100).ToList();
-
-					foreach (TreeData data in m_neighbour_data)
-					{
-						data.Marker.Fill = Brushes.Cyan;
-					}
-				}
-				break;
-
-		}
+		current_pos = e.GetPosition(cMainCanvas);
 	}
 
 	private void ClearNeighbourMarkers()
 	{
 		if (m_neighbour_data != null)
 		{
-			foreach (TreeData data in m_neighbour_data)
+			foreach (Item data in m_neighbour_data)
 			{
 				data.Marker.Fill = Brushes.Green;
 			}
@@ -268,7 +213,7 @@ public partial class MainWindow : Window
 
 	private void ClearRegionMarkers()
 	{
-		foreach (TreeData data in m_quadtree)
+		foreach (Item data in m_quadtree)
 		{
 			data.Marker.Fill = Brushes.Green;
 		}
@@ -277,7 +222,6 @@ public partial class MainWindow : Window
 	private void DeselectButton_Click(object sender, RoutedEventArgs e)
 	{
 		ClearRegionMarkers();
-		m_selection_active = false;
 	}
 
 	private void AddRandomButton_Click(object sender, RoutedEventArgs e)
@@ -292,7 +236,7 @@ public partial class MainWindow : Window
 
 		for (int i = 0; i < random; i++)
 		{
-			TreeData data = new TreeData((float)(m_rnd.NextDouble() * cMainCanvas.Width), (float)(m_rnd.NextDouble() * cMainCanvas.Height));
+			Item data = new Item((float)(m_rnd.NextDouble() * cMainCanvas.Width), (float)(m_rnd.NextDouble() * cMainCanvas.Height));
 
 			m_quadtree.Insert(data);
 		}

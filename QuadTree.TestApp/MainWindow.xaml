@@ -27,8 +27,6 @@
 				Grid.Column="0"
 				Width="500" Height="500"
 				Background="Transparent"
-				MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
-				MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
 				MouseMove="Canvas_MouseMove" />
 		</Grid>
 
