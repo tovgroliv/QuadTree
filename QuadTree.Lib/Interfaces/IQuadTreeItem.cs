@@ -5,5 +5,5 @@ public interface IQuadTreeItem
 	public float X { get; }
 	public float Y { get; }
 
-	public IQuadTreeNode ParentNode { get; set; }
+	public IQuadTreeNode? ParentNode { get; set; }
 }

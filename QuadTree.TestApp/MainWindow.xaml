@@ -7,7 +7,8 @@
 		mc:Ignorable="d"
 		ResizeMode="NoResize"
 		WindowStartupLocation="CenterScreen"
-		Title="QuadTree.Lib Test" Height="560" Width="800">
+		Title="QuadTree.Lib Test" Height="560" Width="800" Icon="/logo.png">
+
 	<Grid Margin="10" x:Name="gMain">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="Auto" />

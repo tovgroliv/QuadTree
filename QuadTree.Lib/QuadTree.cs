@@ -25,9 +25,19 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 		_root.Elements = new();
 	}
 
+	public IEnumerable<T> GetOnNode(T data)
+	{
+		var node = data.ParentNode as QuadTreeNode<T>;
+		if (node == null)
+		{
+			return [];
+		}
+		return node.Elements;
+	}
+
 	public void Update(T data)
 	{
-		if (!data.ParentNode.Bounds.IsPointInside(data))
+		if (data.ParentNode != null && !data.ParentNode.Bounds.IsPointInside(data))
 		{
 			if (Remove(_root, data, data.ParentNode))
 			{

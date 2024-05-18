@@ -1,6 +1,5 @@
 ﻿using QuadTree.Lib;
 using QuadTree.Lib.Interfaces;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,7 +21,7 @@ public partial class MainWindow : Window
 
 		public float X { get; set; }
 		public float Y { get; set; }
-		public IQuadTreeNode ParentNode { get; set; }
+		public IQuadTreeNode? ParentNode { get; set; }
 
 		public Item(float in_x, float in_y)
 		{
@@ -54,11 +53,11 @@ public partial class MainWindow : Window
 	}
 
 
-	QuadTree<Item> m_quadtree;
+	private QuadTree<Item> _quadTree;
 
-	private List<Item> m_neighbour_data = null;
+	private List<Item> _neighbourData = new();
 
-	public Random m_rnd = new Random(DateTime.Now.Millisecond);
+	public Random _random = new Random(DateTime.Now.Millisecond);
 
 	bool _work = true;
 
@@ -70,7 +69,7 @@ public partial class MainWindow : Window
 
 		_width = (int)cMainCanvas.Width;
 
-		m_quadtree = new QuadTree<Item>((float)_width / 2, (float)_width / 2, (float)_width / 2, 4);
+		_quadTree = new QuadTree<Item>((float)_width / 2, (float)_width / 2, (float)_width / 2, 4);
 
 		this.Closing += (s,e) => _work = false;
 
@@ -85,9 +84,9 @@ public partial class MainWindow : Window
 		{
 			Thread.Sleep(40);
 
-			lock (m_quadtree)
+			lock (_quadTree)
 			{
-				foreach (var item in m_quadtree.ToList())
+				foreach (var item in _quadTree.ToList())
 				{
 					var oldX = item.X;
 					var oldY = item.Y;
@@ -103,9 +102,9 @@ public partial class MainWindow : Window
 						item.SpeedY *= -1;
 					}
 
-					m_quadtree.Update(item);
+					_quadTree.Update(item);
 				}
-				foreach (var item in m_quadtree.ToList())
+				foreach (var item in _quadTree.ToList())
 				{
 					if (_work)
 					{
@@ -113,7 +112,7 @@ public partial class MainWindow : Window
 						{
 							item.UpdateMarker();
 							cRectCanvas.Children.Clear();
-							m_quadtree.TraverseNodesAndLeafs(null, DrawQuadTreeNode);
+							_quadTree.TraverseNodesAndLeafs(null, DrawQuadTreeNode);
 
 							if (cbNeighbourSearch.IsChecked == true)
 							{
@@ -132,9 +131,9 @@ public partial class MainWindow : Window
 									count = 10;
 								}
 
-								m_neighbour_data = m_quadtree.QueryNeighbours((float)current_pos.X, (float)current_pos.Y, distance, count).ToList();
+								_neighbourData = _quadTree.QueryNeighbours((float)current_pos.X, (float)current_pos.Y, distance, count).ToList();
 
-								foreach (Item data in m_neighbour_data)
+								foreach (Item data in _neighbourData)
 								{
 									data.Marker.Fill = Brushes.Cyan;
 								}
@@ -154,7 +153,7 @@ public partial class MainWindow : Window
 
 	private void DrawQuadtree()
 	{
-		m_quadtree.TraverseNodesAndLeafs(DrawQuadTreeLeaf, DrawQuadTreeNode);
+		_quadTree.TraverseNodesAndLeafs(DrawQuadTreeLeaf, DrawQuadTreeNode);
 		coundLabel.Text = $"{cMainCanvas.Children.Count}";
 	}
 
@@ -182,7 +181,7 @@ public partial class MainWindow : Window
 
 	private void ClearButton_Click(object sender, RoutedEventArgs e)
 	{
-		m_quadtree.Clear();
+		_quadTree.Clear();
 		cMainCanvas.Children.Clear();
 		cRectCanvas.Children.Clear();
 	}
@@ -194,9 +193,9 @@ public partial class MainWindow : Window
 
 	private void ClearNeighbourMarkers()
 	{
-		if (m_neighbour_data != null)
+		if (_neighbourData != null)
 		{
-			foreach (Item data in m_neighbour_data)
+			foreach (Item data in _neighbourData)
 			{
 				data.Marker.Fill = Brushes.Green;
 			}
@@ -213,7 +212,7 @@ public partial class MainWindow : Window
 
 	private void ClearRegionMarkers()
 	{
-		foreach (Item data in m_quadtree)
+		foreach (Item data in _quadTree)
 		{
 			data.Marker.Fill = Brushes.Green;
 		}
@@ -236,9 +235,9 @@ public partial class MainWindow : Window
 
 		for (int i = 0; i < random; i++)
 		{
-			Item data = new Item((float)(m_rnd.NextDouble() * cMainCanvas.Width), (float)(m_rnd.NextDouble() * cMainCanvas.Height));
+			Item data = new Item((float)(_random.NextDouble() * cMainCanvas.Width), (float)(_random.NextDouble() * cMainCanvas.Height));
 
-			m_quadtree.Insert(data);
+			_quadTree.Insert(data);
 		}
 
 		//coundLabel.Text = $"{m_quadtree.Count()}";

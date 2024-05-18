@@ -1,22 +1,4 @@
-## Table of context
-
-1. [Install](#install)
-2. [Example](#example)
-3. [TODO](#todo)
-4. [Resources](#resources)
- 
-## Install
-
-[NuGet.org](https://www.nuget.org/packages/QuadTree.Lib/)
-
-```c#
-Install-Package QuadTree.Lib
-```
-
-## Example
-
-```c#
-using QuadTree.Lib;
+﻿using QuadTree.Lib;
 using QuadTree.Lib.Interfaces;
 
 class Item(float x, float y) : IQuadTreeItem
@@ -56,18 +38,3 @@ class Program
 		quadTree.GetOnNode(item).ToList().ForEach(n => Console.WriteLine($"{++iterator}. Neighbour - x:{n.X} y:{n.Y}"));
 	}
 }
-```
-
-## TODO
-
- - [ ] Add summary
- - [ ] Add docs
- - [ ] Add some methods for QuadTree
-	- [ ] Normalize
-	- [ ] etc..
- - [ ] Change render in test application
-
-## Resources
-
-1. Wikipedia - [QuadTree](https://en.wikipedia.org/wiki/Quadtree)
-1. Based on [QuadTreePoint](https://github.com/hightower70/QuadtreePoint)

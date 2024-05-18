@@ -9,13 +9,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="logo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\QuadTree.Lib\QuadTree.Lib.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="logo.png">
+    <Resource Include="logo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Resource>
   </ItemGroup>
 
 </Project>
