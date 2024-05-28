@@ -14,7 +14,7 @@ class Program
 	{
 		var halfWidth = 500;
 		// create a quad tree with node size equal to 10
-		var quadTree = new QuadTree<Item>(0, 0, halfWidth, 10);
+		var quadTree = new QuadTree<Item>(0, 0, halfWidth, 10, 10);
 
 		Random random = new Random();
 		// insert 1000 random items

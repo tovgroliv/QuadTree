@@ -1,6 +1,7 @@
 ﻿using QuadTree.Lib;
 using QuadTree.Lib.Interfaces;
 using System.Diagnostics;
+using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -16,8 +17,8 @@ public partial class MainWindow : Window
 	{
 		public Ellipse Marker;
 
-		public float SpeedX { get; set; } = 10;
-		public float SpeedY { get; set; } = 10;
+		public float SpeedX { get; set; } = 0;
+		public float SpeedY { get; set; } = 0;
 
 		public float X { get; set; }
 		public float Y { get; set; }
@@ -69,7 +70,7 @@ public partial class MainWindow : Window
 
 		_width = (int)cMainCanvas.Width;
 
-		_quadTree = new QuadTree<Item>((float)_width / 2, (float)_width / 2, (float)_width / 2, 4);
+		_quadTree = new QuadTree<Item>((float)_width / 2, (float)_width / 2, (float)_width / 2, 4, 10);
 
 		this.Closing += (s,e) => _work = false;
 
@@ -110,9 +111,9 @@ public partial class MainWindow : Window
 					{
 						Application.Current.Dispatcher.Invoke(new Action(() =>
 						{
-							item.UpdateMarker();
-							cRectCanvas.Children.Clear();
-							_quadTree.TraverseNodesAndLeafs(null, DrawQuadTreeNode);
+							//item.UpdateMarker();
+							//cRectCanvas.Children.Clear();
+							//_quadTree.TraverseNodesAndLeafs(null, DrawQuadTreeNode);
 
 							if (cbNeighbourSearch.IsChecked == true)
 							{
@@ -233,11 +234,21 @@ public partial class MainWindow : Window
 			random = 10;
 		}
 
-		for (int i = 0; i < random; i++)
-		{
-			Item data = new Item((float)(_random.NextDouble() * cMainCanvas.Width), (float)(_random.NextDouble() * cMainCanvas.Height));
+		//for (int i = 0; i < random; i++)
+		//{
+		//	Item data = new Item((float)(_random.NextDouble() * cMainCanvas.Width), (float)(_random.NextDouble() * cMainCanvas.Height));
 
-			_quadTree.Insert(data);
+		//	_quadTree.Insert(data);
+		//}
+
+		for (int x = 0; x < 20; x++)
+		{
+			for (int y = 0; y < 20; y++)
+			{
+				Item data = new Item(x * 10, y * 10);
+
+				_quadTree.Insert(data);
+			}
 		}
 
 		//coundLabel.Text = $"{m_quadtree.Count()}";
