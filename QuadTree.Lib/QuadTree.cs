@@ -8,16 +8,17 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 {
 	private QuadTreeNode<T> _root;
 	private int _nodeCapacity;
+	private int _nodeMaxLevel;
 
-	public QuadTree(IQuadTreeRect region, int nodeCapacity)
+	public QuadTree(IQuadTreeRect region, int nodeCapacity, int maxLevel)
 	{
-		_root = new QuadTreeNode<T>(region);
+		_root = new QuadTreeNode<T>(region, 0);
 		_nodeCapacity = nodeCapacity;
 	}
 
-	public QuadTree(IQuadTreeRect region) : this(region, 1) { }
+	public QuadTree(IQuadTreeRect region) : this(region, 1, 10) { }
 	public QuadTree(float centerX, float centerY, float halfSize) : this(new QuadTreeRect(centerX, centerY, halfSize)) { }
-	public QuadTree(float centerX, float centerY, float halfSize, int nodeCapacity) : this(new QuadTreeRect(centerX, centerY, halfSize), nodeCapacity) { }
+	public QuadTree(float centerX, float centerY, float halfSize, int nodeCapacity, int maxLevel) : this(new QuadTreeRect(centerX, centerY, halfSize), nodeCapacity, maxLevel) { }
 
 	public void Clear()
 	{
@@ -193,7 +194,7 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 		{
 			currentNode.Elements.Add(dataToInsert);
 
-			if (currentNode.Elements.Count() < _nodeCapacity)
+			if (currentNode.Elements.Count() < _nodeCapacity || currentNode.Level >= _nodeMaxLevel)
 			{
 				dataToInsert.ParentNode = currentNode;
 				return true;
@@ -207,10 +208,10 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 				float half = bounds.HalfSize / 2;
 
 				currentNode.Children = [
-					new QuadTreeNode<T>(new QuadTreeRect(bounds.CenterX - half, bounds.CenterY - half, half)),
-					new QuadTreeNode<T>(new QuadTreeRect(bounds.CenterX + half, bounds.CenterY - half, half)),
-					new QuadTreeNode<T>(new QuadTreeRect(bounds.CenterX - half, bounds.CenterY + half, half)),
-					new QuadTreeNode<T>(new QuadTreeRect(bounds.CenterX + half, bounds.CenterY + half, half))
+					new QuadTreeNode<T>(new QuadTreeRect(bounds.CenterX - half, bounds.CenterY - half, half), currentNode.Level + 1),
+					new QuadTreeNode<T>(new QuadTreeRect(bounds.CenterX + half, bounds.CenterY - half, half), currentNode.Level + 1),
+					new QuadTreeNode<T>(new QuadTreeRect(bounds.CenterX - half, bounds.CenterY + half, half), currentNode.Level + 1),
+					new QuadTreeNode<T>(new QuadTreeRect(bounds.CenterX + half, bounds.CenterY + half, half), currentNode.Level + 1),
 				];
 
 				elementsToSplite.ForEach(element =>
@@ -372,8 +373,8 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 	{
 		var squaredRadius = radius * radius;
 		var neighbours = Query(x, y, radius)
-			.OrderBy(n => GetSquaredDistance(n, x, y))
 			.Where(n => GetSquaredDistance(n, x, y) <= squaredRadius)
+			.OrderBy(n => GetSquaredDistance(n, x, y))
 			.Take(count);
 
 		return neighbours;
