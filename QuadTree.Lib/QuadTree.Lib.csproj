@@ -8,9 +8,9 @@
 		<Title>QuadTree implementation</Title>
 		<Authors>BlackWind</Authors>
 		<PackageProjectUrl>https://github.com/tovgroliv/QuadTree</PackageProjectUrl>
-		<Version>1.0.0</Version>
-		<AssemblyVersion>1.0.0</AssemblyVersion>
-		<FileVersion>1.0.0</FileVersion>
+		<Version>1.0.1</Version>
+		<AssemblyVersion>1.0.1</AssemblyVersion>
+		<FileVersion>1.0.1</FileVersion>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/tovgroliv/QuadTree</RepositoryUrl>
 		<Description>QuadTree implementation for C#</Description>
