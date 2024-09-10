@@ -369,12 +369,11 @@ public class QuadTree<T> : IEnumerable<T> where T : IQuadTreeItem
 		}
 	}
 
-	public IEnumerable<T> QueryNeighbours(float x, float y, int radius, int count)
+	public IEnumerable<T> QueryNeighbours(float x, float y, int radius, int count, Func<T, bool>? predicate = null)
 	{
-		var squaredRadius = radius * radius;
 		var neighbours = Query(x, y, radius)
-			.Where(n => GetSquaredDistance(n, x, y) <= squaredRadius)
 			.OrderBy(n => GetSquaredDistance(n, x, y))
+			.Where(predicate ?? ((i) => true))
 			.Take(count);
 
 		return neighbours;

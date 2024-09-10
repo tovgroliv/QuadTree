@@ -1,7 +1,6 @@
 ﻿using QuadTree.Lib;
 using QuadTree.Lib.Interfaces;
 using System.Diagnostics;
-using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -24,7 +23,9 @@ public partial class MainWindow : Window
 		public float Y { get; set; }
 		public IQuadTreeNode? ParentNode { get; set; }
 
-		public Item(float in_x, float in_y)
+		public bool Red { get; }
+
+		public Item(float in_x, float in_y, bool red)
 		{
 			var random = new Random();
 			SpeedX *= Math.Sign(random.Next(-1, 1) == 0 ? 1 : -1);
@@ -34,7 +35,7 @@ public partial class MainWindow : Window
 			{
 				Width = 5,
 				Height = 5,
-				Fill = Brushes.Green
+				Fill = red ? Brushes.Red : Brushes.Green
 			};
 
 			Marker.SetValue(Canvas.LeftProperty, in_x - 2.5);
@@ -44,6 +45,7 @@ public partial class MainWindow : Window
 
 			X = in_x;
 			Y = in_y;
+			Red = red;
 		}
 
 		public void UpdateMarker()
@@ -132,7 +134,7 @@ public partial class MainWindow : Window
 									count = 10;
 								}
 
-								_neighbourData = _quadTree.QueryNeighbours((float)current_pos.X, (float)current_pos.Y, distance, count).ToList();
+								_neighbourData = _quadTree.QueryNeighbours((float)current_pos.X, (float)current_pos.Y, distance, count, i => i.Red).ToList();
 
 								foreach (Item data in _neighbourData)
 								{
@@ -198,7 +200,7 @@ public partial class MainWindow : Window
 		{
 			foreach (Item data in _neighbourData)
 			{
-				data.Marker.Fill = Brushes.Green;
+				data.Marker.Fill = data.Red ? Brushes.Red : Brushes.Green;
 			}
 		}
 	}
@@ -215,7 +217,7 @@ public partial class MainWindow : Window
 	{
 		foreach (Item data in _quadTree)
 		{
-			data.Marker.Fill = Brushes.Green;
+			data.Marker.Fill = data.Red ? Brushes.Red : Brushes.Green;
 		}
 	}
 
@@ -245,7 +247,7 @@ public partial class MainWindow : Window
 		{
 			for (int y = 0; y < 20; y++)
 			{
-				Item data = new Item(x * 10, y * 10);
+				Item data = new Item(x * 10, y * 10, _random.Next(0, 2) == 0);
 
 				_quadTree.Insert(data);
 			}
