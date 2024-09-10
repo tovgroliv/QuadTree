@@ -63,7 +63,8 @@ class Program
  - [ ] Add summary
  - [ ] Add docs
  - [ ] Add some methods for QuadTree
-	- [ ] Normalize
+	- [x] Normalize
+	- [x] Predicates
 	- [ ] etc..
  - [ ] Change render in test application
 
